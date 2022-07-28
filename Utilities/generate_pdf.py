@@ -36,7 +36,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     logo_w = 40
     logo_h = 54
     pdf.image(x = 11, 
-              name = 'Resources/NEW Green EconoME Logo.PNG', 
+              name = '../Resources/NEW Green EconoME Logo.PNG', 
               w = logo_w, 
               h = logo_h)
 
