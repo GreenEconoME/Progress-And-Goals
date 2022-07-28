@@ -1,3 +1,11 @@
+# Add files to ignore
+config.py
+P and G Report.ipynb
+testing.pdf
+Credentials.txt
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
