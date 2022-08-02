@@ -62,6 +62,7 @@ month_ending = month_dict[month_select]
 if st.button('Generate Progress and Goals Report'):
     with st.spinner('Generating Progress and Goals Report'):
 
+        # Check if the building and date selections are entered
         if (credential_upload and 
             prop_id and 
             year_ending and 
@@ -69,7 +70,6 @@ if st.button('Generate Progress and Goals Report'):
             prop_id != 123456789):
 
             with st.spinner("Pulling property information data."):
-
                 # Pull the about data
                 about_data = get_about_data(prop_id, domain, auth)
 
@@ -102,20 +102,21 @@ if st.button('Generate Progress and Goals Report'):
                                                 best_wui_change_value, monthly_kbtu, water_df, 
                                                 monthly_energy)
 
-            with st.spinner('Encoding PDF to display and download.'):
-                # Embed the progress and goals report to display it:
-                base64_pdf = b64encode(p_and_g_report).decode("utf-8")
+            ## Display a preview of the Progress and Goals Report
+            # with st.spinner('Encoding PDF to display and download.'):
+            #     # Embed the progress and goals report to display it:
+            #     base64_pdf = b64encode(p_and_g_report).decode("utf-8")
 
-                # Display the progress and goals report on the page                                   
-                pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="700" height="400" type="application/pdf">'
-                st.markdown(pdf_display, unsafe_allow_html=True)
+            #     # Display the progress and goals report on the page                                   
+            #     pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="700" height="400" type="application/pdf">'
+            #     st.markdown(pdf_display, unsafe_allow_html=True)
 
 
             # Add a button to download the Progress and Goals report
             st.download_button(
                 label="Download Progress and Goals Report",
                 data=p_and_g_report,
-                file_name="Progress and Goals Report.pdf",
+                file_name=f"{about_data['prop_address']} Progress and Goals Report.pdf",
                 mime="application/pdf"
             )
             st.caption(f"Click to download the Progress and Goals report for {about_data['prop_address']}")
