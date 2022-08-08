@@ -5,6 +5,7 @@ from datetime import datetime
 from calendar import monthrange
 import numpy as np
 import pandas as pd
+import math
 
 # Create helper function to sort the best WNSEUI and WUI changes from last year in compliance period
 def filter_tuple_list(given_list, target_value):
@@ -49,12 +50,17 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
         year_data['Year Ending'] = datetime(year_ending - i, 
                                             month_ending, 
                                             monthrange(year_ending - i, month_ending)[1])
-
+        
         # Add the units for each of the metrics for the first year that is pulled
         if i == 0:
             for j in [1, 2, 3, 4, 6, 7, 8, 9]:
-                units_of_metrics.append(year_ending_dict['propertyMetrics']['metric'][j]['@uom'])
-
+                # If the metric exists, add it to the units of metrics list
+                try:
+                    units_of_metrics.append(year_ending_dict['propertyMetrics']['metric'][j]['@uom'])
+                # If tht metric does not exist, add an empty string
+                except:
+                    units_of_metrics.append('')
+                
         # Check to see if each metric is populated (a string) and then save it to the dictionary
         # If the metric is not populated - assign it to np.nan
         if type(year_ending_dict['propertyMetrics']['metric'][0]['value']) == str:
@@ -149,50 +155,54 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
 
     # Drop the NaN values
     kbtu_df.dropna(thresh = 2, inplace = True)
-
+    
     # Sort the kbtu_df by End Date
     kbtu_df.sort_values(by = 'End Date', inplace = True)
 
+
     # Create a dataframe from the pulled metrics
     annual_df = pd.DataFrame(annual_metrics)
-
-    # Drop the rows within the annual_df for the years that there is no data
+    
+    # Drop the rows for the years that there is no data
     annual_df.dropna(thresh = 7, inplace = True)
+    
+    # Sort the values of the annual metrics by ascending Year Ending values
+    annual_df.sort_values(by = 'Year Ending', ascending = True, inplace = True)
     
     ## Get the best WNSEUI and WUI % Changes from the compliance period and the final year of the compliance period
     # Create a list to hold the percent change and year of each of the WNSEUI values
     eui_percent_changes = []
     
     # Create a variable to hold the final year's WN SEUI value
-    final_value = float(annual_df.loc[annual_df['Year Ending'] == annual_df.loc[0, 'Year Ending'], 'Weather Normalized Source Energy Use Intensity kBtu/ft²'].item())
+    final_value = float(annual_df.loc[annual_df['Year Ending'] == annual_df.iloc[-1, annual_df.columns.get_loc('Year Ending')], f'Weather Normalized Source Energy Use Intensity {units_of_metrics[1]}'].item())
     
     # Loop through the years and get the percent change compared to the final year in the compliance period
-    for year in annual_df.loc[1:, 'Year Ending']:
-        current_value = float(annual_df.loc[annual_df['Year Ending'] == year, 'Weather Normalized Source Energy Use Intensity kBtu/ft²'].item())
+    for year in annual_df['Year Ending'].iloc[:-1]:
+        current_value = float(annual_df.loc[annual_df['Year Ending'] == year, f'Weather Normalized Source Energy Use Intensity {units_of_metrics[1]}'].item())
         
         # Append the percent change and the year to the percent changes list
         eui_percent_changes.append(((final_value - current_value) / current_value, year.strftime('%m/%d/%Y')))
     
     # Save the best eui percent change and the corresponding year
-    best_eui_change_year = filter_tuple_list(eui_percent_changes, min(eui_percent_changes, key = lambda x: x[0])[0])
-    best_eui_change_value = round(min(eui_percent_changes, key = lambda x: x[0])[0] * 100, 2)
+    best_eui_change_year = filter_tuple_list(eui_percent_changes, min(eui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0])
+    best_eui_change_value = round(min(eui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0] * 100, 2)
 
     # Create a list to hold the percent change and year of each of the WUI values
     wui_percent_changes = []
     
     # Create a variable to hold the final year's WUI value
-    final_value = float(annual_df.loc[annual_df['Year Ending'] == annual_df.loc[0, 'Year Ending'], 'Water Use Intensity gal/ft²'].item())
+    final_value = float(annual_df.loc[annual_df['Year Ending'] == annual_df.iloc[-1, annual_df.columns.get_loc('Year Ending')], f'Water Use Intensity {units_of_metrics[5]}'].item())
     
     # Loop through the years and get the percent change compared to the final year in the compliance period
-    for year in annual_df.loc[1:, 'Year Ending']:
-        current_value = float(annual_df.loc[annual_df['Year Ending'] == year, 'Water Use Intensity gal/ft²'].item())
+    for year in annual_df['Year Ending'].iloc[:-1]:
+        current_value = float(annual_df.loc[annual_df['Year Ending'] == year, f'Water Use Intensity {units_of_metrics[5]}'].item())
         
         # Append the percent change and the year to the percent changes list                      
         wui_percent_changes.append(((final_value - current_value) / current_value, year.strftime('%m/%d/%Y')))
     
     # Save the best eui percent change and the corresponding year
-    best_wui_change_year = filter_tuple_list(wui_percent_changes, min(wui_percent_changes, key = lambda x: x[0])[0])
-    best_wui_change_value = round(min(wui_percent_changes, key = lambda x: x[0])[0] * 100, 2)
+    best_wui_change_year = filter_tuple_list(wui_percent_changes, min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0])
+    best_wui_change_value = round(min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0] * 100, 2)
     
     
     return annual_df, kbtu_df, best_eui_change_year, best_eui_change_value, best_wui_change_year, best_wui_change_value

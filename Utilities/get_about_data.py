@@ -25,7 +25,7 @@ def get_about_data(prop_id, domain, auth):
     about_data['prop_sq_ft'] = prop_info_dict['property']['grossFloorArea']['value']
 
     # Check if the call for the LA Building ID was successful and appened the id if it did or None if it didn't
-    if prop_ld_id_call.status_code == 200:
+    if prop_la_id_dict['additionalIdentifiers'] is not None:
         about_data['prop_la_id'] = prop_la_id_dict['additionalIdentifiers']['additionalIdentifier']['value']
     else:
         about_data['prop_la_id'] = 'None'

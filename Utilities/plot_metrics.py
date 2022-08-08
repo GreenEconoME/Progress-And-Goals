@@ -39,59 +39,65 @@ def graph_eu(kbtu_df, prop_name):
 ###################################
 # Create a function to graph historical water meter usage
 def graph_hcf(water_df, prop_name):
-    if water_df.shape[1] == 2:
-        # Graphing the historical meter usage
-        hcf_trace_1 = go.Scatter(
-                x = water_df['End Date'],
-                y = water_df['Usage (HCF)'],
-                name = 'HCF Consumption',
-                mode = 'lines+markers', 
-                hovertemplate = 'Month: %{x}<br>Consumption: %{y:,.0f} HCF<extra></extra>')
+    # Check if a water_df was creted (would not get created without water meters)
+    if water_df is not None:
+        if water_df.shape[1] == 2:
+            # Graphing the historical meter usage
+            hcf_trace_1 = go.Scatter(
+                    x = water_df['End Date'],
+                    y = water_df['Usage (HCF)'],
+                    name = 'HCF Consumption',
+                    mode = 'lines+markers', 
+                    hovertemplate = 'Month: %{x}<br>Consumption: %{y:,.0f} HCF<extra></extra>')
 
-        hcf_trace_2 = go.Scatter(
-                x = water_df['End Date'],
-                y = [water_df['Usage (HCF)'].mean()] * len(water_df['End Date']),
-                name = 'Monthly Average',
-                line_dash = 'dash',
-                mode = 'lines', 
-                hovertemplate = 'Monthly Average: %{y:,.1f} HCF<extra></extra>')
+            hcf_trace_2 = go.Scatter(
+                    x = water_df['End Date'],
+                    y = [water_df['Usage (HCF)'].mean()] * len(water_df['End Date']),
+                    name = 'Monthly Average',
+                    line_dash = 'dash',
+                    mode = 'lines', 
+                    hovertemplate = 'Monthly Average: %{y:,.1f} HCF<extra></extra>')
 
-        data = [hcf_trace_1, hcf_trace_2]
+            data = [hcf_trace_1, hcf_trace_2]
 
-        hcf_fig = go.Figure(data = data)
+            hcf_fig = go.Figure(data = data)
 
-        hcf_fig.update_layout(title = f'{prop_name}<br>Monthly Water Consumption (HCF)', 
-                              yaxis_title = 'Consumption (HCF)', 
-                              yaxis_tickformat = '%{text:,}', 
-                              legend=dict(orientation="h"))
-    else:
-        # Get a list of the electric meter columns to plot
-        usage_columns = []
-        for col in water_df.columns:
-            if 'HCF' in col:
-                usage_columns.append(col)
-
-        fig = go.Figure()
-        for col in usage_columns:
-            fig.add_trace(go.Scatter(x = water_df.dropna(subset = usage_columns, how = 'all')['End Date'],
-                                     y = water_df.dropna(subset = usage_columns, how = 'all')[col],
-                                     name = col,
-                                     mode = 'lines+markers',
-                                     hovertemplate = '%{y:,.0f} HCF'))
-
-        fig.update_layout(
-                        hovermode = 'x unified', 
-                        title = f'Water Meter Monthly Consumption', 
-                        yaxis_title = 'Consumption (HCF)', 
-                        legend=dict(orientation="h"))
-
-        # Check if anything was plotted, if so return the figure, if not return None
-        if usage_columns:
-            return fig
+            hcf_fig.update_layout(title = f'{prop_name}<br>Monthly Water Consumption (HCF)', 
+                                  yaxis_title = 'Consumption (HCF)', 
+                                  yaxis_tickformat = '%{text:,}', 
+                                  legend=dict(orientation="h"))
+            # Return the hcf fig
+            return hcf_fig
+            
         else:
-            return None
+            # Get a list of the electric meter columns to plot
+            usage_columns = []
+            for col in water_df.columns:
+                if 'HCF' in col:
+                    usage_columns.append(col)
 
-    return hcf_fig
+            fig = go.Figure()
+            for col in usage_columns:
+                fig.add_trace(go.Scatter(x = water_df.dropna(subset = usage_columns, how = 'all')['End Date'],
+                                         y = water_df.dropna(subset = usage_columns, how = 'all')[col],
+                                         name = col,
+                                         mode = 'lines+markers',
+                                         hovertemplate = '%{y:,.0f} HCF'))
+
+            fig.update_layout(
+                            hovermode = 'x unified', 
+                            title = f'Water Meter Monthly Consumption', 
+                            yaxis_title = 'Consumption (HCF)', 
+                            legend=dict(orientation="h"))
+
+            # Check if anything was plotted, if so return the figure, if not return None
+            if usage_columns:
+                return fig
+            else:
+                return None
+    else:
+        return None
+        
 
 ###################################
 ###################################
