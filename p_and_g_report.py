@@ -32,8 +32,8 @@ st.caption('Upload the API credentials within a .txt file with the Username and 
 
 # Create a dictionary to hold the numeric value of the month selection
 month_dict = {'Jan': 1, 'Feb' : 2, 'Mar' : 3, 'Apr' : 4, 'May' : 5, 
-                'Jun' : 6, 'Jul' : 7, 'Aug' : 8, 'Sep' : 9, 'Oct' : 10,
-                'Nov' : 11, 'Dec' : 12}
+              'Jun' : 6, 'Jul' : 7, 'Aug' : 8, 'Sep' : 9, 'Oct' : 10,
+              'Nov' : 11, 'Dec' : 12}
 
 # Add an input for the ESPM property ID
 prop_id = int(st.text_input('Enter the Property ID', 
@@ -66,7 +66,7 @@ if st.button('Generate Progress and Goals Report'):
         if (credential_upload and 
             prop_id and 
             year_ending and 
-            month_select is not None) and(
+            month_select is not None) and (
             prop_id != 123456789):
 
             with st.spinner("Pulling property information data."):
@@ -102,16 +102,6 @@ if st.button('Generate Progress and Goals Report'):
                                                 best_wui_change_value, monthly_kbtu, water_df, 
                                                 monthly_energy)
 
-            ## Display a preview of the Progress and Goals Report
-            # with st.spinner('Encoding PDF to display and download.'):
-            #     # Embed the progress and goals report to display it:
-            #     base64_pdf = b64encode(p_and_g_report).decode("utf-8")
-
-            #     # Display the progress and goals report on the page                                   
-            #     pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="700" height="400" type="application/pdf">'
-            #     st.markdown(pdf_display, unsafe_allow_html=True)
-
-
             # Add a button to download the Progress and Goals report
             st.download_button(
                 label="Download Progress and Goals Report",
@@ -121,6 +111,7 @@ if st.button('Generate Progress and Goals Report'):
             )
             st.caption(f"Click to download the Progress and Goals report for {about_data['prop_address']}")
 
+            # Display the plotly graphs on the streamlit app
             st.write(graph_eu(monthly_kbtu, about_data['prop_address']))
             st.write(graph_hcf(water_df, about_data['prop_address']))
             st.write(graph_es_score(monthly_energy))

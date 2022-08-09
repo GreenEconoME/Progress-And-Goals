@@ -164,5 +164,6 @@ def pull_water_consumption(prop_id, domain, auth):
         
         return water_df
 
+    # If there is no water meter, return None
     else:
         return None

@@ -7,15 +7,18 @@ def get_about_data(prop_id, domain, auth):
     # Get the property information for a given property id
     prop_info = requests.get(domain + f'/property/{prop_id}',
                         auth = auth)
+    # Parse the call into a dictionary
     prop_info_dict = xmltodict.parse(prop_info.content)
     
     # Make a call to get the LA Building Id
-    prop_ld_id_call = requests.get(domain + f'/property/{prop_id}/identifier/list', 
+    prop_la_id_call = requests.get(domain + f'/property/{prop_id}/identifier/list', 
                                    auth = auth)
-    prop_la_id_dict = xmltodict.parse(prop_ld_id_call.content)
+    # Parse the call into a dictionary
+    prop_la_id_dict = xmltodict.parse(prop_la_id_call.content)
 
     # Create a dictionary to hold the property's about data
     about_data = {}
+    # Parse the property information call and store the relevant about data within the dictionary
     about_data['prop_name'] = prop_info_dict['property']['name']
     about_data['prop_address'] = prop_info_dict['property']['address']['@address1']
     about_data['prop_city'] = prop_info_dict['property']['address']['@city']
@@ -30,4 +33,5 @@ def get_about_data(prop_id, domain, auth):
     else:
         about_data['prop_la_id'] = 'None'
         
+    # Return the about_data dictionary
     return about_data

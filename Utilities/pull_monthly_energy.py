@@ -8,28 +8,26 @@ from calendar import monthrange
 import math
 from datetime import datetime
 
-def pull_monthly_energy(prop_id, domain, auth):
-    # Read in a dataframe that contains one property per row, and pull the monthly metrics for that property
-    # Save the monthly dataframe into a dictionary with the property name as the key
-    # Return the dictionary of dataframes and the list of properties that errored
-    
-    # Create variables to hold data while pulling
-    # Create a dictionary that will hold dataframes for each property
+def pull_monthly_energy(prop_id, domain, auth): 
+    # Make a call to get the meter associations for the property   
     meter_associations = requests.get(domain + f'/association/property/{prop_id}/meter', 
                                       auth = auth)
 
-    # Parse the meter associations call
+    # Parse the meter associations call into a dictionary
     meter_assoc_dict = xmltodict.parse(meter_associations.content)
 
-    # Get a list of the energy meters ids
+    # Get a list of the energy meters ids to use for calls for consumption
     energy_meters = meter_assoc_dict['meterPropertyAssociationList']['energyMeterAssociation']['meters']['meterId']
     # If there is more than one energy meter - continue, else put the energy meter into a list to iterate through
     if type(energy_meters) == list:
         pass
     else:
         energy_meters = [meter_assoc_dict['meterPropertyAssociationList']['energyMeterAssociation']['meters']['meterId']]
+
     # Set the meter count to 0
     meter_count = 0
+
+    # Iterate through the energy meters to pull meter information and consumption data
     for meter in energy_meters:
         # Using the meter Id, get the information for that meter
         meter_info = requests.get(domain + f'/meter/{meter}', 
@@ -38,16 +36,17 @@ def pull_monthly_energy(prop_id, domain, auth):
         # Parse the metrics call
         meter_info_dict = xmltodict.parse(meter_info.content)
 
-        # Get the type of meter and the meter name from the meter info
+        # Get the type of meter and the meter name from the meter info to store into a meter descriptor which will be the column name 
         meter_descriptor = meter_info_dict['meter']['type'] + f" ({meter_info_dict['meter']['unitOfMeasure']})" + ' Meter: ' + meter_info_dict['meter']['name'] + f' Id: {meter}'
 
-        # Get consumption data for the water meter
+        # Get consumption data for the energy meter
         consumption_data = requests.get(domain + f'/meter/{meter}/consumptionData', 
-                                auth = auth)
+                                        auth = auth)
         energy_consumption = xmltodict.parse(consumption_data.content)
 
         # Create a dataframe from the energy meter consumption
         energy_data = []
+        # Iterate through the energy consumption call, and store the usage for each date into a dictionary to append the the energy_data list
         for i in range(len(energy_consumption['meterData']['meterConsumption'])):
             monthly_data = {}
             monthly_data['End Date'] = energy_consumption['meterData']['meterConsumption'][i]['endDate']
@@ -55,10 +54,10 @@ def pull_monthly_energy(prop_id, domain, auth):
 
             energy_data.append(monthly_data)
 
-        # Create the water dataframe
+        # Create the energy dataframe for this meter
         meter_df = pd.DataFrame(energy_data)
 
-        # Format the dataframe columns
+        # Format the datatypes of the columns
         meter_df['End Date'] = pd.to_datetime(meter_df['End Date'])
         meter_df[meter_descriptor] = pd.to_numeric(meter_df[meter_descriptor])
 
@@ -145,7 +144,9 @@ def pull_monthly_energy(prop_id, domain, auth):
         # Parse the historical call
         energy_metrics_dict = xmltodict.parse(energy_metrics.content)
 
+        # For each metric in the energy_metrics_dict,
         # Check if the metric exists, and add it to the corresponding column
+        # If the metric does not exist, fill the value with a nan
         if type(energy_metrics_dict['propertyMetrics']['metric'][0]['value']) == str:
             energy_df.loc[row, 'Energy Star Score'] = energy_metrics_dict['propertyMetrics']['metric'][0]['value']
         else:

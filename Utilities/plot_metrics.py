@@ -27,7 +27,6 @@ def graph_eu(kbtu_df, prop_name):
     kbtu_fig = go.Figure(data = data)
     
     kbtu_fig.update_layout(title = f'{prop_name}<br>Monthly Energy Consumption (kBtu)', 
-                           # xaxis_title = 'Month', 
                            yaxis_title = 'Consumption (kBtu)', 
                            showlegend = True, 
                            legend=dict(orientation="h"))
@@ -41,6 +40,7 @@ def graph_eu(kbtu_df, prop_name):
 def graph_hcf(water_df, prop_name):
     # Check if a water_df was creted (would not get created without water meters)
     if water_df is not None:
+        # Check to see if there is only one water meter - will have two columns - date and usage
         if water_df.shape[1] == 2:
             # Graphing the historical meter usage
             hcf_trace_1 = go.Scatter(
@@ -68,9 +68,10 @@ def graph_hcf(water_df, prop_name):
                                   legend=dict(orientation="h"))
             # Return the hcf fig
             return hcf_fig
-            
+        
+        # If there were more than one water meter, plot the water meters by meter
         else:
-            # Get a list of the electric meter columns to plot
+            # Get a list of the water meter columns to plot
             usage_columns = []
             for col in water_df.columns:
                 if 'HCF' in col:
@@ -95,6 +96,7 @@ def graph_hcf(water_df, prop_name):
                 return fig
             else:
                 return None
+    # Return None if a water df was never created
     else:
         return None
         
@@ -103,6 +105,7 @@ def graph_hcf(water_df, prop_name):
 ###################################
 # Create function to graph the historical energy star scores
 def graph_es_score(energy_df):
+    # Check if there are non null ES Score values, if there are - plot the historical ES scores
     if not energy_df['Energy Star Score'].isnull().all():
         es_trace = go.Scatter(x = energy_df.loc[11:, 'End Date'], 
                               y = energy_df['Energy Star Score'], 
@@ -113,7 +116,6 @@ def graph_es_score(energy_df):
         es_fig = go.Figure(data = data)
 
         es_fig.update_layout(title = f'Monthly Energy Star Score', 
-                             # xaxis_title = 'Date', 
                              yaxis_title = 'Energy Star Score', 
                              showlegend = True, 
                              legend=dict(orientation="h"))
@@ -123,24 +125,28 @@ def graph_es_score(energy_df):
 ###################################
 # Create a function to graph the WNSEUI and the National Median source eui
 def graph_seui(energy_df):
+    # Create a trace for the WNSEUI
     wnseui = go.Scatter(x = energy_df.loc[11:, 'End Date'], 
                         y = energy_df['Weather Normalized Source EUI (kBtu/ft²)'], 
                         name = 'Weather Normalized Source EUI', 
                         mode = 'lines+markers', 
                         hovertemplate = 'Date: %{x}<br>WN Source EUI: %{y} (kBtu/ft²)<extra></extra>')
     
+    # Create a trace for the national median source eui
     nat_med_seui = go.Scatter(x = energy_df.loc[11:, 'End Date'], 
                                 y = energy_df['National Median Source EUI (kBtu/ft²)'], 
                                 name = 'National Median Source EUI', 
                                 mode = 'lines+markers', 
                                 hovertemplate = 'Date: %{x}<br>Nat. Med. Source EUI: %{y} (kBtu/ft²)<extra></extra>')
     
+    # Add the traces to the data list
     data = [wnseui, nat_med_seui]
     
+    # Create the figure
     seui_fig = go.Figure(data = data)
     
+    # Add the title, axis title, add legend to bottom of plot
     seui_fig.update_layout(title = f'Source Energy Use Intensity', 
-                           # xaxis_title = 'Date', 
                            yaxis_title = 'Energy Use Intensity (kBtu/ft²)', 
                            legend=dict(orientation="h"))
     
@@ -158,6 +164,7 @@ def graph_e_meters_overlay(energy_df):
             usage_columns.append(col)
             
     fig = go.Figure()
+    # Iterate through the columns that contain kWh and create a trace for each one
     for col in usage_columns:
         fig.add_trace(go.Scatter(x = energy_df.dropna(subset = usage_columns, how = 'all')['End Date'],
                                  y = energy_df.dropna(subset = usage_columns, how = 'all')[col],
@@ -187,6 +194,7 @@ def graph_g_meters_overlay(energy_df):
             usage_columns.append(col)
             
     fig = go.Figure()
+    # Iterate through the columns that contain 'therm' and create a trace for each to plot
     for col in usage_columns:
         fig.add_trace(go.Scatter(x = energy_df.dropna(subset = usage_columns, how = 'all')['End Date'],
                                  y = energy_df.dropna(subset = usage_columns, how = 'all')[col],

@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import math
 
-# Create helper function to sort the best WNSEUI and WUI changes from last year in compliance period
+# Create helper function to sort the best WNSEUI and WUI changes the first four years and the last year in compliance period
 def filter_tuple_list(given_list, target_value):
     for x, y in given_list:
         if x == target_value:
@@ -22,7 +22,7 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
     units_of_metrics = []
     # Loop through the year ending and the previous four years to gather progress and goals metrics
     for i in range(5):
-        # Create a dictionary to hold the current years metrics
+        # Create dictionaries to hold the current years metrics
         year_data = {}
         consumption_data = {}
 
@@ -44,7 +44,7 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
         # Parse the api call into a dictionary
         year_ending_dict = xmltodict.parse(year_ending_metrics.content)
 
-        # Pull the data from the api call into the year_data dictionary
+        ## Pull the data from the api call into the year_data dictionary
 
         # Save the current year ending date
         year_data['Year Ending'] = datetime(year_ending - i, 
@@ -116,23 +116,27 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
         # Append the year_data dictionary to the annual_metrics list
         annual_metrics.append(year_data)
 
-        # Make another call to pull the kBtu data
+        # Make a call to pull the historical monthly kBtu data for electric and gas
         kbtu_data = []
         for i in range(5):
+            # Pull the current years kbtu energy consumption
             monthly_kbtu_data = requests.get(domain + f"/property/{espm_id}/metrics/monthly?year={year_ending-i}&month={month_ending}&measurementSystem=EPA", 
                                              headers = {'PM-Metrics': 'siteElectricityUseMonthly, siteNaturalGasUseMonthly'}, 
                                              auth = auth)
-
+            # Parse the kbtu call into a dictionary
             kbtu_dict = xmltodict.parse(monthly_kbtu_data.content)
 
-
+            # Loop through the response dictionary and add the monthly usage to the monthly kbtu dict
             for i in range(len(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'])):
                 monthly_kbtu = {}
+                # Add the year, month, date as the End Date value
                 monthly_kbtu['End Date'] = pd.Timestamp(datetime(int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['@year']), 
                                                                      int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['@month']), 
                                                                      monthrange(int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['@year']), 
                                                                                 int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['@month']))[1]))
 
+                # Check if the consumption exists for that month and add it to the monthly kbtu dict
+                # If there is no electric or gas data for that month, fill the value with a nan
                 if type(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['value']) == str:
                     monthly_kbtu['Electric kBtu'] = kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['value']
                 else:
@@ -153,7 +157,7 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
     kbtu_df['Electric kBtu'] = pd.to_numeric(kbtu_df['Electric kBtu'])
     kbtu_df['Gas kBtu'] = pd.to_numeric(kbtu_df['Gas kBtu'])
 
-    # Drop the NaN values
+    # Drop the NaN values - use thresh of 2 to drop the rows that have neither gas nor electric consumption
     kbtu_df.dropna(thresh = 2, inplace = True)
     
     # Sort the kbtu_df by End Date
