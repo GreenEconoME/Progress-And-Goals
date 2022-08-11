@@ -234,7 +234,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                 col_width = (pdf.epw - pdf.epw / (len(plot_metrics_df.columns) - 1)) / (len(plot_metrics_df.columns) - 1)
 
             # For the row indicies that have longer names and need to be on multiple lines, put in a multicell
-            if row_index in [2, 3, 4, 5, 8, 9, 10] and column_index == 'index':
+            if row_index in [2, 3, 4, 5, 6, 8, 9, 10] and column_index == 'index':
                 pdf.multi_cell(w = col_width, 
                                h = None, 
                                txt = bolden + str(value) + bolden,

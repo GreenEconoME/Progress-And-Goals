@@ -89,9 +89,9 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
             year_data[f"National Median Source Energy Use Intensity {units_of_metrics[3]}"] = np.nan
 
         if type(year_ending_dict['propertyMetrics']['metric'][5]['value']) == str:
-            year_data['Water Score'] = year_ending_dict['propertyMetrics']['metric'][5]['value']
+            year_data['Water Score (Multifamily Only)'] = year_ending_dict['propertyMetrics']['metric'][5]['value']
         else:
-            year_data['Water Score'] = np.nan
+            year_data['Water Score (Multifamily Only)'] = np.nan
 
         if type(year_ending_dict['propertyMetrics']['metric'][6]['value']) == str:
             year_data[f"Total Water Use {units_of_metrics[4]}"] = year_ending_dict['propertyMetrics']['metric'][6]['value']
