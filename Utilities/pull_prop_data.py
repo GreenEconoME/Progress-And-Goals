@@ -179,14 +179,13 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
     
     # Create a variable to hold the final year's WN SEUI value
     final_value = float(annual_df.loc[annual_df['Year Ending'] == annual_df.iloc[-1, annual_df.columns.get_loc('Year Ending')], f'Weather Normalized Source Energy Use Intensity {units_of_metrics[1]}'].item())
-    
+
     # Loop through the years and get the percent change compared to the final year in the compliance period
     for year in annual_df['Year Ending'].iloc[:-1]:
         current_value = float(annual_df.loc[annual_df['Year Ending'] == year, f'Weather Normalized Source Energy Use Intensity {units_of_metrics[1]}'].item())
-        
         # Append the percent change and the year to the percent changes list
         eui_percent_changes.append(((final_value - current_value) / current_value, year.strftime('%m/%d/%Y')))
-    
+
     # Save the best eui percent change and the corresponding year
     best_eui_change_year = filter_tuple_list(eui_percent_changes, min(eui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0])
     best_eui_change_value = round(min(eui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0] * 100, 2)
