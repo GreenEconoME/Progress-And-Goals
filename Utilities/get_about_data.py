@@ -29,7 +29,15 @@ def get_about_data(prop_id, domain, auth):
 
     # Check if the call for the LA Building ID was successful and appened the id if it did or None if it didn't
     if prop_la_id_dict['additionalIdentifiers'] is not None:
-        about_data['prop_la_id'] = prop_la_id_dict['additionalIdentifiers']['additionalIdentifier']['value']
+        # If there are more than one additional identifier, iterate through them to grab the LA building ID identifier
+        if type(prop_la_id_dict['additionalIdentifiers']['additionalIdentifier']) == list:
+            for i in range(len(prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'])):
+                if prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'][i]['additionalIdentifierType']['@name'] == 'Los Angeles Building ID':
+                    about_data['prop_la_id'] = prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'][i]['value']
+        # If there is only one identifier, add it as the property la id
+        else:
+            about_data['prop_la_id'] = prop_la_id_dict['additionalIdentifiers']['additionalIdentifier']['value']
+    # If there are no additional identifiers, set the property's la building id to 'None'
     else:
         about_data['prop_la_id'] = 'None'
         
