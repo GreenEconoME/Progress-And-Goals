@@ -8,7 +8,7 @@ import math
 import pandas as pd
 from Utilities.plot_metrics import (graph_eu, graph_hcf, graph_es_score, 
                             graph_seui, graph_e_meters_overlay, 
-                            graph_g_meters_overlay)
+                            graph_g_meters_overlay, earliest_full_data)
 
 # Using the fpdf library, generate a progress and goals report for the selected property
 def generate_pdf(about_data, ann_metrics, prop_id, 
@@ -649,7 +649,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     # Add the monthly Source Energy Use Intensity plot
     seui_buff = io.BytesIO()
-    monthly_seui_plot = graph_seui(monthly_energy)
+    monthly_seui_plot = graph_seui(monthly_energy.loc[monthly_energy['End Date'] >= earliest_full_data(monthly_kbtu)])
     monthly_seui_plot.write_image(seui_buff)
     pdf.image(seui_buff, 
               w = pdf.epw, 
@@ -657,7 +657,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     # Add the monthly energy star score
     es_score_buff = io.BytesIO()
-    monthly_es_plot = graph_es_score(monthly_energy)
+    monthly_es_plot = graph_es_score(monthly_energy.loc[monthly_energy['End Date'] >= earliest_full_data(monthly_kbtu)])
     # Check if there is a monthly ES plot - will return None if there is no historical ES scores
     if monthly_es_plot is not None:
         monthly_es_plot.write_image(es_score_buff)

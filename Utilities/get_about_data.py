@@ -34,8 +34,8 @@ def get_about_data(prop_id, domain, auth):
             for i in range(len(prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'])):
                 if prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'][i]['additionalIdentifierType']['@name'] == 'Los Angeles Building ID':
                     about_data['prop_la_id'] = prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'][i]['value']
-        # If there is only one identifier, add it as the property la id
-        else:
+        # If there is only one additional identifier, check if it is an LA building id and assign it as the property la id if it is
+        elif prop_la_id_dict['additionalIdentifiers']['additionalIdentifier']['additionalIdentifierType']['@name'] == 'Los Angeles Building ID':
             about_data['prop_la_id'] = prop_la_id_dict['additionalIdentifiers']['additionalIdentifier']['value']
     # If there are no additional identifiers, set the property's la building id to 'None'
     else:
