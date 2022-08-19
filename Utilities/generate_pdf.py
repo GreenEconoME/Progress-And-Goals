@@ -8,7 +8,7 @@ import math
 import pandas as pd
 from Utilities.plot_metrics import (graph_eu, graph_hcf, graph_es_score, 
                             graph_seui, graph_e_meters_overlay, 
-                            graph_g_meters_overlay, earliest_full_data)
+                            graph_g_meters_overlay)
 
 def earliest_full_data(df):
     # Check if there is both electric and gas data
