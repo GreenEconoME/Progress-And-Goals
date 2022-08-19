@@ -8,7 +8,7 @@ from Utilities.pull_monthly_energy import pull_monthly_energy
 from Utilities.generate_pdf import generate_pdf
 from Utilities.plot_metrics import (graph_eu, graph_hcf, graph_es_score, 
                             graph_seui, graph_e_meters_overlay, 
-                            graph_g_meters_overlay, earliest_full_data)
+                            graph_g_meters_overlay)
 
 # Set a title for the page
 st.markdown("<h1 style = 'text-align: center; color: green;'>Green EconoME</h1>", unsafe_allow_html = True)
@@ -114,8 +114,8 @@ if st.button('Generate Progress and Goals Report'):
             # Display the plotly graphs on the streamlit app
             st.write(graph_eu(monthly_kbtu, about_data['prop_address']))
             st.write(graph_hcf(water_df, about_data['prop_address']))
-            st.write(graph_es_score(monthly_energy.loc[monthly_energy['End Date'] >= earliest_full_data(monthly_kbtu)]))
-            st.write(graph_seui(monthly_energy.loc[monthly_energy['End Date'] >= earliest_full_data(monthly_kbtu)]))
+            # st.write(graph_es_score(monthly_energy.loc[monthly_energy['End Date'] >= earliest_full_data(monthly_kbtu)]))
+            # st.write(graph_seui(monthly_energy.loc[monthly_energy['End Date'] >= earliest_full_data(monthly_kbtu)]))
             st.write(graph_e_meters_overlay(monthly_energy))
             st.write(graph_g_meters_overlay(monthly_energy))
 
