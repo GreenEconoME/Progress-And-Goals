@@ -1,20 +1,6 @@
 # Import dependencies
 import plotly.graph_objects as go
 
-# Define a function that will get the date of the earliest data that contains both electric and gas - given that there are both
-# This will be used to trim the data for the graphs that are plotting ES scores and SEUI for dates where there is missing energy data
-# Need this data trimmed - ie if there is no gas data but there is electric data - gives an inflated ES Score and a lower SEUI
-def earliest_full_data(df):
-    # Check if there is both electric and gas data
-    if not df['Electric kBtu'].isna().all() or df['Gas kBtu'].isna().all():
-        # If there is gas data, trim the df to contain the values where there is both 
-        df = df.loc[df['End Date'] >= max(df.loc[df['Electric kBtu'].first_valid_index(), 'End Date'], df.loc[df['Gas kBtu'].first_valid_index(), 'End Date'])]
-        # Return the earliest date in the trimmed dataframe
-        return df['End Date'].min()
-    # If one of them is empty return the earliest date of the original dataframe
-    else:
-        return df['End Date'].min()
-
 
 ###################################
 ###################################
