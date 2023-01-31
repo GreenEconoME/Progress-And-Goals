@@ -12,7 +12,7 @@ from Utilities.plot_metrics import (graph_eu, graph_hcf, graph_es_score,
 
 def earliest_full_data(df):
     # Check if there is both electric and gas data
-    if not df['Electric kBtu'].isna().all() or df['Gas kBtu'].isna().all():
+    if not (df['Electric kBtu'].isna().all() or df['Gas kBtu'].isna().all()):
         # If there is gas data, trim the df to contain the values where there is both 
         df = df.loc[df['End Date'] >= max(df.loc[df['Electric kBtu'].first_valid_index(), 'End Date'], df.loc[df['Gas kBtu'].first_valid_index(), 'End Date'])]
         # Return the earliest date in the trimmed dataframe
