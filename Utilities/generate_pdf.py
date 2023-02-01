@@ -479,7 +479,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                   f"    - The above benchmarking metrics can be used for the following EBEWE Phase II Exemptions:\n\n"
                   f"        - Avaliable energy exemptions include a 15% reduction in Weather Normalized Source EUI and an Energy Star Score of 75 or higher. \n\n" + 
                   f"        - A 20% reduction in Water Use Intensity can satisfy a water exemption.\n\n"
-                  f"    - Weather Normalized Source EUI and Water Use Intensity values for Dec 31, {comp_periods[about_data['prop_la_id'][-1]] - 1} " + 
+                  f"    - Weather Normalized Source EUI and Water Use Intensity values for Dec 31, {comp_periods[about_data['prop_la_id'][-1]]} " + 
                       f"will be compared to the values from the following years: " + 
                       f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][0] + 1}, " + 
                       f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][1] + 1}, " + 
