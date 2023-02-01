@@ -481,10 +481,10 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                   f"        - A 20% reduction in Water Use Intensity can satisfy a water exemption.\n\n"
                   f"    - Weather Normalized Source EUI and Water Use Intensity values for Dec 31, {comp_periods[about_data['prop_la_id'][-1]] - 1} " + 
                       f"will be compared to the values from the following years: " + 
-                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][0]}, " + 
-                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][1]}, " + 
-                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][2]} and " + 
-                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][3]}. " + 
+                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][0] + 1}, " + 
+                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][1] + 1}, " + 
+                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][2] + 1} and " + 
+                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][3] + 1}. " + 
                       f"The percent changes between the final year of the comparative period to the other years " + 
                       f"will be used to determine if the above exemptions can be met.")
         
