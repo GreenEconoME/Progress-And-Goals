@@ -37,8 +37,8 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
                                                       'waterScore, ' + 
                                                       'waterUseTotal, ' +
                                                       'waterIntensityTotal, ' + 
-                                                      'totalGHGEmissions,' + 
-                                                      'totalGHGEmissionsIntensity'},
+                                                      'totalLocationBasedGHGEmissions,' + 
+                                                      'totalLocationBasedGHGEmissionsIntensity'},
                                            auth = auth)
 
         # Parse the api call into a dictionary
