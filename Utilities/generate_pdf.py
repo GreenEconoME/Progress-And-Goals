@@ -505,8 +505,11 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                      fill = True)
             
             ## Create the text for the exemption messages determined by either satisfying the exemption or not
+            # Check if there is an es score available
+            if ann_metrics.loc[0, 'Energy Star Score'] == 'N/A':
+                es_message = f"- Energy Star Score not calculated for {ann_metrics['Year Ending'].dt.date[0]}"
             # Check for an ES score of 75 or higher
-            if float(ann_metrics.loc[0, 'Energy Star Score']) >= 75:
+            elif float(ann_metrics.loc[0, 'Energy Star Score']) >= 75:
                 es_message = (f"- Achieved an Energy Star Score of {ann_metrics.loc[0, 'Energy Star Score']}.\n" + 
                               f"- Apply for Energy Star Certification to receive an energy exemption.")
                               
