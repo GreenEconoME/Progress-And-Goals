@@ -347,12 +347,19 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     else:
         # Calculate the shifts for the WN SEUI and WUI for the most recent two years within the benchmarking metrics
         latest_wnseui = float(ann_metrics['Weather Normalized Source Energy Use Intensity kBtu/ft²'].iloc[-1])
-        previous_wnseui = float(ann_metrics['Weather Normalized Source Energy Use Intensity kBtu/ft²'].iloc[-2])
+        try:
+            previous_wnseui = float(ann_metrics['Weather Normalized Source Energy Use Intensity kBtu/ft²'].iloc[-2])
+        # If there is only one year of data, set the previous wnseui as the current
+        except IndexError:
+            previous_wnseui = latest_wnseui
         wnseui_shift = round((latest_wnseui - previous_wnseui) / previous_wnseui * 100, 2)
 
         # Using partial matching - may not have a water meter to pull the units used to create the column title
         latest_wui = float(ann_metrics.filter(like = 'Water Use Intensity').iloc[-1])
-        previous_wui = float(ann_metrics.filter(like = 'Water Use Intensity').iloc[-2])
+        try:
+            previous_wui = float(ann_metrics.filter(like = 'Water Use Intensity').iloc[-2])
+        except IndexError:
+            previous_wui = latest_wui
         wui_shift = round((latest_wui - previous_wui) / previous_wui * 100, 2)
 
         # Check if the shifts are available, if not replace with N/A
@@ -402,6 +409,12 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  txt = 'Water Use Intensity')
 
         # Add the EBEWE reduction recent shifts - WNSEUI
+        recent_year = ann_metrics['Year Ending'].iloc[-1].year
+        try:
+            second_most_recent_year = ann_metrics['Year Ending'].iloc[-2].year
+        # If there are not more than one year, set the second most recent year to the most recent year
+        except IndexError:
+            second_most_recent_year = recent_year
         pdf.set_fill_color(93, 129, 119)
         pdf.set_font('helvetica', '', 11)
         pdf.cell(w = pdf.epw / 2, 
@@ -411,7 +424,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  new_x = 'RIGHT',
                  new_y = 'TOP',
                  fill = True,
-                 txt = f"From {ann_metrics['Year Ending'].iloc[-2].year} to {ann_metrics['Year Ending'].iloc[-1].year}: {wnseui_shift}")
+                 txt = f"From {second_most_recent_year} to {recent_year}: {wnseui_shift}")
 
         # Add the EBEWE reduction recent shifts - WUI
         pdf.cell(w = pdf.epw / 2, 
@@ -421,7 +434,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  new_x = 'RIGHT',
                  new_y = 'TOP',
                  fill = True,
-                 txt = f"From {ann_metrics['Year Ending'].iloc[-2].year} to {ann_metrics['Year Ending'].iloc[-1].year}: {wui_shift}")
+                 txt = f"From {second_most_recent_year} to {recent_year}: {wui_shift}")
 
 
     ### Add the EBEWE Compliance page
