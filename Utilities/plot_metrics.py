@@ -26,7 +26,7 @@ def graph_eu(kbtu_df, prop_name):
         
     kbtu_fig = go.Figure(data = data)
     
-    kbtu_fig.update_layout(title = f'{prop_name}<br>Monthly Energy Consumption (kBtu)', 
+    kbtu_fig.update_layout(title = f'{prop_name}<br>MONTHLY ENERGY CONSUMPTION (kBtu)', 
                            yaxis_title = 'Consumption (kBtu)', 
                            showlegend = True, 
                            legend=dict(orientation="h"))
@@ -62,7 +62,7 @@ def graph_hcf(water_df, prop_name):
 
             hcf_fig = go.Figure(data = data)
 
-            hcf_fig.update_layout(title = f'{prop_name}<br>Monthly Water Consumption (HCF)', 
+            hcf_fig.update_layout(title = f'{prop_name}<br>MONTHLY WATER CONSUMPTION (HCF)', 
                                   yaxis_title = 'Consumption (HCF)', 
                                   yaxis_tickformat = '%{text:,}', 
                                   legend=dict(orientation="h"))
@@ -87,7 +87,7 @@ def graph_hcf(water_df, prop_name):
 
             fig.update_layout(
                             hovermode = 'x unified', 
-                            title = f'Water Meter Monthly Consumption', 
+                            title = 'Water Meter Monthly Consumption', 
                             yaxis_title = 'Consumption (HCF)', 
                             legend=dict(orientation="h"))
 
@@ -109,14 +109,23 @@ def graph_es_score(energy_df):
     if not energy_df['Energy Star Score'].isnull().all():
         es_trace = go.Scatter(x = energy_df.loc[11:, 'End Date'], 
                               y = energy_df['Energy Star Score'], 
-                              name = 'Energy Star Score', 
+                              name = 'Energy Star® Score', 
                               mode = 'lines+markers', 
                               hovertemplate = 'Date: %{x}<br>Energy Star Score: %{y}<extra></extra>')
-        data = [es_trace]
+
+        es_trace_2 = go.Scatter(x = energy_df['End Date'],
+                                y = [75] * len(energy_df['End Date']),
+                                name = 'Energy Star® Score Target',
+                                line_dash = 'dash',
+                                mode = 'lines', 
+                                marker_color = 'green',
+                                hovertemplate = 'ES Certifical Goal<extra></extra>')
+                    
+        data = [es_trace, es_trace_2]
         es_fig = go.Figure(data = data)
 
-        es_fig.update_layout(title = f'Monthly Energy Star Score', 
-                             yaxis_title = 'Energy Star Score', 
+        es_fig.update_layout(title = f'MONTHLY ENERGY STAR® SCORE', 
+                             yaxis_title = 'Energy Star® Score', 
                              showlegend = True, 
                              legend=dict(orientation="h"))
         return es_fig
@@ -128,7 +137,7 @@ def graph_seui(energy_df):
     # Create a trace for the WNSEUI
     wnseui = go.Scatter(x = energy_df.loc[11:, 'End Date'], 
                         y = energy_df['Weather Normalized Source EUI (kBtu/ft²)'], 
-                        name = 'Weather Normalized Source EUI', 
+                        name = 'Building Energy Use Intensity (EUI)', 
                         mode = 'lines+markers', 
                         hovertemplate = 'Date: %{x}<br>WN Source EUI: %{y} (kBtu/ft²)<extra></extra>')
     
@@ -146,7 +155,7 @@ def graph_seui(energy_df):
     seui_fig = go.Figure(data = data)
     
     # Add the title, axis title, add legend to bottom of plot
-    seui_fig.update_layout(title = f'Source Energy Use Intensity', 
+    seui_fig.update_layout(title = 'MONTHLY OVERALL ENERGY USAGE ON A SQ. FT. BASIS<br>MONTHLY ENERGY USE VS. NATIONAL MEDIAN COMPARISON (SOURCE EUI)', 
                            yaxis_title = 'Energy Use Intensity (kBtu/ft²)', 
                            legend=dict(orientation="h"))
     
@@ -173,7 +182,7 @@ def graph_e_meters_overlay(energy_df):
                                  hovertemplate = '%{y:,.0f} kWh'))
         
     fig.update_layout(hovermode = 'x unified', 
-                      title = f'Electric Meter Monthly Consumption', 
+                      title = 'MONTHLY ELECTRIC METER CONSUMPTION (kWh)', 
                       yaxis_title = 'kWh Consumption', 
                       legend=dict(orientation="h"))
     
@@ -203,7 +212,7 @@ def graph_g_meters_overlay(energy_df):
                                  hovertemplate = '%{y:,.0f} Therms'))
         
     fig.update_layout(hovermode = 'x unified', 
-                      title = f'Gas Meter Monthly Consumption', 
+                      title = 'MONTHLY GAS METER CONSUMPTION (Therms)', 
                       yaxis_title = 'Therm Consumption', 
                       legend=dict(orientation="h"))
     
