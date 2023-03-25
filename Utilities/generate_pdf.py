@@ -28,12 +28,26 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                 best_wui_change_value, monthly_kbtu, water_df, 
                 monthly_energy):
 
+    class PDF(FPDF):
+        def footer(self):
+            self.set_y(-15)
+            self.set_font("helvetica", "I", 7)
+            self.cell(0, 
+                     10, 
+                     ' | '.join(['GREENECONOME.COM', 
+                                '2665 30th Street #209, Santa Monica, CA 90405', 
+                                '424-422-9696', 
+                                'info@greeneconome.com', 
+                                'CA Contractors License B and C-10 #1001368']),
+                     align = 'C')
+
     # Create the pdf object and set the author and title
-    pdf = FPDF()
+    # pdf = FPDF()
+    pdf = PDF()
     pdf.set_author('Kyle Gee')
     pdf.set_title('Progress and Goals Report')
     pdf.add_page()
-    pdf.set_font('helvetica', 'B', 30)
+    pdf.set_font('helvetica', 'B', 20)
 
     # Set the background for the top progress and goals section
     start_x = pdf.x
@@ -49,15 +63,16 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     # Add the logo to the top left of the pdf
     # Add width and height variables for the logo
-    logo_w = 40
-    logo_h = 54
-    pdf.image(x = 11, 
+    logo_w = 80
+    logo_h = round(logo_w / 4.3626)
+    pdf.image(x = 11,
+              y = 11, 
               name = 'Resources/NEW Green EconoME Logo.png', 
               w = logo_w, 
               h = logo_h)
 
     # Set the x,y coordinates to the right of the logo to write Progress and Goals Report
-    pdf.set_xy(pdf.x + logo_w, 10)
+    pdf.set_xy(pdf.x + logo_w, 5)
     # Add the Progress and Goals Report title
     pdf.cell(w = pdf.epw - logo_w, 
              h = 20,
@@ -69,8 +84,8 @@ def generate_pdf(about_data, ann_metrics, prop_id,
              fill = False)
 
     # Add cell to place an empty gap between Progress and Goals Report and the About Info
-    pdf.set_xy(pdf.x, pdf.y + 10)
-    pdf.set_font('helvetica', '', 23)
+    pdf.set_xy(pdf.x, pdf.y)
+    pdf.set_font('helvetica', '', 18)
     pdf.multi_cell(w = 0, 
              h = None,
              txt = f"**{about_data['prop_name']}**\n",
@@ -82,7 +97,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     # Add the Energy Star Score Cell 
     # Set the coordinates to be under the logo
-    pdf.set_xy(x = 10, y = 10 + logo_h + 1)
+    pdf.set_xy(x = 10, y = pdf.y + 2)
     pdf.set_font('helvetica', '', 65)
     # Set variables for the energy star score height and width
     es_score_w = 40
@@ -94,7 +109,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
              markdown = True,
              border = 0, 
              align = 'C')
-
+    bottom_of_es_cell = pdf.y + 2
 
     # Add the address and the property use data (Middle Column)
     pdf.set_font('helvetica', '', 12)
@@ -117,6 +132,12 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     # Add the address and the IDs (Right Column)
     pdf.set_font('helvetica', '', 12)
+    id_line = []
+    if about_data['prop_la_id'] != 'None':
+        id_line.append(f"**LA Building ID:** {about_data['prop_la_id']}")
+    if about_data['prop_ca_id'] != 'None':
+        id_line.append(f"**CA Building ID:** {about_data['prop_ca_id']}")
+
     pdf.multi_cell(w = (pdf.epw - es_score_w) / 2, 
                    h = None,
                    txt = '**Property Address:**\n' + 
@@ -124,7 +145,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                          f"{about_data['prop_city']}, {about_data['prop_state']} {about_data['prop_postal_code']}\n" + 
                          f'\n' + 
                          f'**ESPM Property ID:** {prop_id}\n' + 
-                         f"**LA Building ID:** {about_data['prop_la_id']}", 
+                         '\n'.join(id_line), 
                    border = 0,
                    align = 'L',
                    markdown = True)
@@ -134,9 +155,10 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     prop_add_y = pdf.y
 
     # Write Energy Star Score below the Energy Star Score number
-    pdf.set_xy(10 , es_score_h + logo_h + 11)
+    # pdf.set_xy(10 , es_score_h + logo_h + 20)
+    pdf.set_xy(10 , bottom_of_es_cell + es_score_h)
     pdf.cell(w = es_score_w, 
-             txt = 'Energy Star Score', 
+             txt = 'Energy Star® Score', 
              border = 0, 
              align = 'C')
 
@@ -181,6 +203,14 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     ##### Write in the benchmarking analytics table
     # Create a copy of the annual metrics to format for displaying
     plot_metrics_df = copy.deepcopy(ann_metrics)
+    if about_data['prop_function'] != 'Multifamily Housing':
+        plot_metrics_df.drop(columns = ['Water Score (Multifamily Only)'], inplace = True)
+
+    # Drop the columns that are not used in consultations
+    plot_metrics_df.drop(columns = ['Weather Normalized Source Energy Use kBtu'], inplace = True)
+    # Drop the National Median Source Energy Use and Total Water Use columns (units don't get pulled if there is no data)
+    plot_metrics_df = plot_metrics_df.loc[:,~plot_metrics_df.columns.str.contains('^National Median Source Energy Use', case=False)]
+    plot_metrics_df = plot_metrics_df.loc[:,~plot_metrics_df.columns.str.contains('^Total Water Use', case=False)]
 
     # Format the dataframe to interate through and add to the pdf file
     plot_metrics_df['Year Ending'] = [x.strftime('%Y-%m-%d') for x in plot_metrics_df['Year Ending']]
@@ -205,23 +235,46 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  border = 1,
                  fill = True
             )
-    
+    ## Old coloring (green for energy, blue for water, yellow/gold for GHG)
     # Iterate through where the table will be and color the energy, water and ghg rows
+    # Color for non-multifamily props
+    # if about_data['prop_function'] != 'Multifamily Housing':
+    #     for i in range(plot_metrics_df.shape[0]):
+    #         # Set the x, y coordinates, each iteration the x is to the left and the y shifts down by one line height defined above
+    #         pdf.set_xy(post_analytics_title_x, post_analytics_title_y + line_height * i)
+    #         # Color the energy related rows shades of green
+    #         if i <= 3:
+    #             color_rows(r1 = 93, g1 = 149, b1 = 119, r2 = 93, g2 = 129, b2 = 119, 
+    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
+    #         # Color the water related rows shades of blue
+    #         elif i <= 4:
+    #             color_rows(r1 = 74, g1 = 197, b1 = 199, r2 = 65, g2 = 169, b2 = 171, 
+    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
+    #         # Color the GHG rows shades of yellow-green
+    #         else:
+    #             color_rows(r1 = 164, g1 = 209, b1 = 86, r2 = 148, g2 = 189, b2 = 77, 
+    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
+    # else:
+    #     for i in range(plot_metrics_df.shape[0]):
+    #         # Set the x, y coordinates, each iteration the x is to the left and the y shifts down by one line height defined above
+    #         pdf.set_xy(post_analytics_title_x, post_analytics_title_y + line_height * i)
+    #         # Color the energy related rows shades of green
+    #         if i <= 3:
+    #             color_rows(r1 = 93, g1 = 149, b1 = 119, r2 = 93, g2 = 129, b2 = 119, 
+    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
+    #         # Color the water related rows shades of blue
+    #         elif i <= 5:
+    #             color_rows(r1 = 74, g1 = 197, b1 = 199, r2 = 65, g2 = 169, b2 = 171, 
+    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
+    #         # Color the GHG rows shades of yellow-green
+    #         else:
+    #             color_rows(r1 = 164, g1 = 209, b1 = 86, r2 = 148, g2 = 189, b2 = 77, 
+    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
     for i in range(plot_metrics_df.shape[0]):
-        # Set the x, y coordinates, each iteration the x is to the left and the y shifts down by one line height defined above
         pdf.set_xy(post_analytics_title_x, post_analytics_title_y + line_height * i)
-        # Color the energy related rows shades of green
-        if i <= 5:
-            color_rows(r1 = 93, g1 = 149, b1 = 119, r2 = 93, g2 = 129, b2 = 119, 
-                       iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
-        # Color the water related rows shades of blue
-        elif i <= 8:
-            color_rows(r1 = 74, g1 = 197, b1 = 199, r2 = 65, g2 = 169, b2 = 171, 
-                       iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
-        # Color the GHG rows shades of yellow-green
-        else:
-            color_rows(r1 = 164, g1 = 209, b1 = 86, r2 = 148, g2 = 189, b2 = 77, 
-                       iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
+        color_rows(r1 = 237, g1 = 237, b1 = 237, r2 = 255, g2 = 255, b2 = 255, 
+                   iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
+            
 
     # Return to the location of the start of the benchmarking analytics table data to fill the colored cells with data
     pdf.set_xy(post_analytics_title_x, post_analytics_title_y)
@@ -244,8 +297,12 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                 pdf.set_font('helvetica', '', 11)
                 col_width = (pdf.epw - pdf.epw / (len(plot_metrics_df.columns) - 1)) / (len(plot_metrics_df.columns) - 1)
 
+            # If the value is Energy Star Score, replace it with Energy Star® Score
+            if value == 'Energy Star Score':
+                value = 'Energy Star® Score'
+
             # For the row indicies that have longer names and need to be on multiple lines, put in a multicell
-            if row_index in [2, 3, 4, 5, 6, 8, 9, 10] and column_index == 'index':
+            if row_index in [2, 3, 4, 5, 6, 7] and column_index == 'index':
                 pdf.multi_cell(w = col_width, 
                                h = None, 
                                txt = bolden + str(value) + bolden,
@@ -299,7 +356,9 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  markdown = True)
 
         # Add column title - WN SEUI
-        pdf.set_fill_color(93, 149, 119)
+        # Old coloring
+        # pdf.set_fill_color(93, 149, 119)
+        pdf.set_fill_color(237, 237, 237)
         pdf.set_font('helvetica', '', 14)
         pdf.cell(w = pdf.epw / 2, 
                  h = 6, 
@@ -321,7 +380,9 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  txt = 'Water Use Intensity')
 
         # Add the EBEWE reduction best shifts - WNSEUI Shift
-        pdf.set_fill_color(93, 129, 119)
+        # Old coloring
+        # pdf.set_fill_color(93, 129, 119)
+        pdf.set_fill_color(255, 255, 255)
         pdf.set_font('helvetica', '', 11)
         pdf.cell(w = pdf.epw / 2, 
                  h = 6, 
@@ -387,7 +448,9 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  markdown = True)
 
         # Add the WNSEUI shift column title
-        pdf.set_fill_color(93, 149, 119)
+        # Old coloring
+        # pdf.set_fill_color(93, 149, 119)
+        pdf.set_fill_color(237, 237, 237)
         pdf.set_font('helvetica', '', 14)
         pdf.cell(w = pdf.epw / 2, 
                  h = 6, 
@@ -415,7 +478,9 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         # If there are not more than one year, set the second most recent year to the most recent year
         except IndexError:
             second_most_recent_year = recent_year
-        pdf.set_fill_color(93, 129, 119)
+        # Old Coloring
+        # pdf.set_fill_color(93, 129, 119)
+        pdf.set_fill_color(255, 255, 255)
         pdf.set_font('helvetica', '', 11)
         pdf.cell(w = pdf.epw / 2, 
                  h = 6, 
@@ -435,6 +500,146 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  new_y = 'TOP',
                  fill = True,
                  txt = f"From {second_most_recent_year} to {recent_year}: {wui_shift}")
+
+
+    #### Generate and add the plots to the P&G report
+
+    ## Monthly Consumption Plots
+    pdf.add_page()
+
+    # Add title for the Energy and Water Consumption plots page
+    pdf.set_font('helvetica', '', 30)
+    pdf.set_fill_color(93, 189, 119)
+    pdf.cell(w = 0, 
+             h = 12,
+             txt = 'Energy and Water Consumption', 
+             new_x = 'LEFT',
+             new_y = 'NEXT',
+             align = 'C', 
+             border = 1,
+             fill = True)
+
+    # Generate and save the historical kbtu usage
+    # Create an image object to hold the figure
+    kbtu_buffer = io.BytesIO()
+    kbtu_plot = graph_eu(monthly_kbtu, about_data['prop_address'])
+    kbtu_plot.write_image(kbtu_buffer)
+    # Plot the historical kbtu consumption
+    pdf.image(kbtu_buffer, 
+              w = pdf.epw, 
+              h = (pdf.eph / 2) * 0.9)
+
+    # Generate and save the historical water consumption
+    # Create an image object to hold the figure
+    hcf_consump_buff = io.BytesIO()
+    # Generate the plot
+    water_plot = graph_hcf(water_df, about_data['prop_address'])
+    # Check if the plot exists - if there is no water meter graph_hcf will return None
+    if water_plot is not None:
+        water_plot.write_image(hcf_consump_buff)
+        # Plot the historical water data
+        pdf.image(hcf_consump_buff,
+                  w = pdf.epw,
+                  h = (pdf.eph / 2) * 0.9)
+    # If there is no water consumption graph, write that there is no water meter
+    else:
+        pdf.set_font('helvetica', '', 20)
+        pdf.cell(w = 0, 
+                 h = None,
+                 txt = 'This Property does not have a water meter.', 
+                 border = 0, 
+                 align = 'C')
+
+
+    ## Monthly ESPM Metrics
+    pdf.add_page()
+
+    # Add title for the Source EUI and Energy Star Score page
+    pdf.set_font('helvetica', '', 30)
+    pdf.cell(w = 0, 
+             h = 12,
+             txt = 'Source EUI and Energy Star® Score', 
+             new_x = 'LEFT',
+             new_y = 'NEXT',
+             align = 'C', 
+             border = 1,
+             fill = True)
+
+    # Add the monthly Source Energy Use Intensity plot
+    seui_buff = io.BytesIO()
+    monthly_seui_plot = graph_seui(monthly_energy.loc[monthly_energy['End Date'] >= earliest_full_data(monthly_kbtu)])
+    monthly_seui_plot.write_image(seui_buff)
+    pdf.image(seui_buff, 
+              w = pdf.epw, 
+              h = (pdf.eph / 2) * 0.9)
+
+    # Add the monthly energy star score
+    es_score_buff = io.BytesIO()
+    monthly_es_plot = graph_es_score(monthly_energy.loc[monthly_energy['End Date'] >= earliest_full_data(monthly_kbtu)])
+    # Check if there is a monthly ES plot - will return None if there is no historical ES scores
+    if monthly_es_plot is not None:
+        monthly_es_plot.write_image(es_score_buff)
+        pdf.image(es_score_buff, 
+                  w = pdf.epw, 
+                  h = (pdf.eph / 2) * 0.9)
+    # If there are no historical ES scores, write that the property does not qualify for an ES score
+    else:
+        pdf.set_font('helvetica', '', 20)
+        pdf.cell(w = 0, 
+                 h = None,
+                 txt = 'This Property does not qualify for an Energy Star® Score.', 
+                 border = 0, 
+                 align = 'C')
+
+    ## Monthly consumption by meters
+    pdf.add_page()
+
+    # Add title for the Source EUI and Energy Star Score page
+    pdf.set_font('helvetica', '', 30)
+    pdf.cell(w = 0, 
+             h = 12,
+             txt = 'Monthly Electric and Gas Consumption', 
+             new_x = 'LEFT',
+             new_y = 'NEXT',
+             align = 'C', 
+             border = 1,
+             fill = True)
+
+    # Add the monthly consumption by electric meter
+    e_meter_buff = io.BytesIO()
+    monthly_e_meters = graph_e_meters_overlay(monthly_energy)
+    # Check if there is a monthly electric meter - monthly_e_meters will return None if there is no meter
+    if monthly_e_meters is not None:
+        monthly_e_meters.write_image(e_meter_buff)
+        pdf.image(e_meter_buff, 
+                  w = pdf.epw, 
+                  h = (pdf.eph / 2) * 0.9)
+    # If there is no plot, write that the property does not have an electric meter
+    else:
+        pdf.set_font('helvetica', '', 20)
+        pdf.cell(w = 0, 
+                 h = None,
+                 txt = 'This Property does not contain an electric meter.', 
+                 border = 0, 
+                 align = 'C')
+
+    # Add the monthly consumption by gas meter
+    g_meter_buff = io.BytesIO()
+    monthly_g_meters = graph_g_meters_overlay(monthly_energy)
+    # Cehck if there is a monthly gas consumption plot - monthly_g_meters will return None if there is no gas meters
+    if monthly_g_meters is not None:
+        monthly_g_meters.write_image(g_meter_buff)
+        pdf.image(g_meter_buff, 
+                  w = pdf.epw, 
+                  h = (pdf.eph / 2) * 0.9)
+    # If there is no plot, write that the property does not contain a gas meter
+    else:
+        pdf.set_font('helvetica', '', 20)
+        pdf.cell(w = 0, 
+                 h = None,
+                 txt = 'This Property does not contain a gas meter.', 
+                 border = 0, 
+                 align = 'C')
 
 
     ### Add the EBEWE Compliance page
@@ -467,9 +672,13 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             for column_index, value in row.items():
                 # Set the fill colors for the rows to alternate shades of green
                 if row_index % 2 == 0:
-                    pdf.set_fill_color(93, 149, 119)
+                    # Old coloring
+                    # pdf.set_fill_color(93, 149, 119)
+                    pdf.set_fill_color(237, 237, 237)
                 else:
-                    pdf.set_fill_color(93, 129, 119)
+                    # Old coloring
+                    # pdf.set_fill_color(93, 129, 119)
+                    pdf.set_fill_color(255, 255, 255)
                 # Make a cell to hold the table value
                 pdf.multi_cell(w = col_width, 
                                h = line_height, 
@@ -487,19 +696,20 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         # Set the font size and set the x,y coordinates to add a gap between the dates table and the text
         pdf.set_font('helvetica', '', 12)
         pdf.set_xy(10, pdf.y + 15)
-        pdf.write(txt = f"{about_data['prop_address']} has the Los Angeles building id: {about_data['prop_la_id']}. \n\n" + 
-                  f"    - The compliance due date is Dec 1, {comp_periods[about_data['prop_la_id'][-1]] + 1}.\n\n" +
-                  f"    - The above benchmarking metrics can be used for the following EBEWE Phase II Exemptions:\n\n"
-                  f"        - Avaliable energy exemptions include a 15% reduction in Weather Normalized Source EUI and an Energy Star Score of 75 or higher. \n\n" + 
-                  f"        - A 20% reduction in Water Use Intensity can satisfy a water exemption.\n\n"
-                  f"    - Weather Normalized Source EUI and Water Use Intensity values for Dec 31, {comp_periods[about_data['prop_la_id'][-1]]} " + 
-                      f"will be compared to the values from the following years: " + 
-                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][0] + 1}, " + 
-                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][1] + 1}, " + 
-                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][2] + 1} and " + 
-                      f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][3] + 1}. " + 
-                      f"The percent changes between the final year of the comparative period to the other years " + 
-                      f"will be used to determine if the above exemptions can be met.")
+        pdf.write(txt = f"{about_data['prop_address']} has the Los Angeles Building ID: {about_data['prop_la_id']}. \n\n" + 
+                  f"- The compliance due date is Dec 1, {comp_periods[about_data['prop_la_id'][-1]] + 1}.\n\n" +
+                  f"- The above benchmarking metrics can be used for the following EBEWE Phase II Exemptions:\n\n"
+                  f"    - Avaliable energy exemptions include a 15% reduction in Weather Normalized Source EUI\n"
+                  f"      and an Energy Star® Score of 75 or higher. \n\n" + 
+                  f"    - A 20% reduction in Water Use Intensity can satisfy a water exemption.\n\n"
+                  f"- Weather Normalized Source EUI and Water Use Intensity values for Dec 31, {comp_periods[about_data['prop_la_id'][-1]]} " + 
+                    f"will be compared to the values from the following years: " + 
+                    f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][0] + 1}, " + 
+                    f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][1] + 1}, " + 
+                    f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][2] + 1} and " + 
+                    f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][3] + 1}. " + 
+                    f"The percent changes between the final year of the comparative period to the other years " + 
+                    f"will be used to determine if the above exemptions can be met.")
         
         # If the report was generated for the final year of the compliance period - generate exemption results
         if comp_periods[about_data['prop_la_id'][-1]] == int(year_ending):
@@ -520,14 +730,14 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             ## Create the text for the exemption messages determined by either satisfying the exemption or not
             # Check if there is an es score available
             if ann_metrics.loc[0, 'Energy Star Score'] == 'N/A':
-                es_message = f"- Energy Star Score not calculated for {ann_metrics['Year Ending'].dt.date[0]}"
+                es_message = f"- Energy Star® Score not calculated for {ann_metrics['Year Ending'].dt.date[0]}"
             # Check for an ES score of 75 or higher
             elif float(ann_metrics.loc[0, 'Energy Star Score']) >= 75:
-                es_message = (f"- Achieved an Energy Star Score of {ann_metrics.loc[0, 'Energy Star Score']}.\n" + 
-                              f"- Apply for Energy Star Certification to receive an energy exemption.")
+                es_message = (f"- Achieved an Energy Star® Score of {ann_metrics.loc[0, 'Energy Star Score']}.\n" + 
+                              f"- Apply for Energy Star® Certification to receive an energy exemption.")
                               
             else:
-                es_message = f"- Did not achieve an Energy Star Score of 75 or above."
+                es_message = f"- Did not achieve an Energy Star® Score of 75 or above."
             # Check if there was at least a 15% reduction in WNSEUI
             if best_eui_change_value <= -15:
                 eui_message = (f"- Satisfied the 15% Weather Normalized Source Energy Use Intensity Reduction.\n" + 
@@ -548,7 +758,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             # ES Score Title block
             pdf.multi_cell(w = pdf.epw / 3, 
                            h = None,
-                           txt = '**Energy Star Score**', 
+                           txt = '**Energy Star® Score**', 
                            new_x = 'RIGHT', 
                            new_y = 'TOP', 
                            align = 'C', 
@@ -610,145 +820,6 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                            align = 'L', 
                            border = 0, 
                            markdown = True)
-
-    #### Generate and add the plots to the P&G report
-
-    ## Monthly Consumption Plots
-    pdf.add_page()
-
-    # Add title for the Energy and Water Consumption plots page
-    pdf.set_font('helvetica', '', 30)
-    pdf.set_fill_color(93, 189, 119)
-    pdf.cell(w = 0, 
-             h = 12,
-             txt = 'Energy and Water Consumption', 
-             new_x = 'LEFT',
-             new_y = 'NEXT',
-             align = 'C', 
-             border = 1,
-             fill = True)
-
-    # Generate and save the historical kbtu usage
-    # Create an image object to hold the figure
-    kbtu_buffer = io.BytesIO()
-    kbtu_plot = graph_eu(monthly_kbtu, about_data['prop_address'])
-    kbtu_plot.write_image(kbtu_buffer)
-    # Plot the historical kbtu consumption
-    pdf.image(kbtu_buffer, 
-              w = pdf.epw, 
-              h = (pdf.eph / 2) * 0.9)
-
-    # Generate and save the historical water consumption
-    # Create an image object to hold the figure
-    hcf_consump_buff = io.BytesIO()
-    # Generate the plot
-    water_plot = graph_hcf(water_df, about_data['prop_address'])
-    # Check if the plot exists - if there is no water meter graph_hcf will return None
-    if water_plot is not None:
-        water_plot.write_image(hcf_consump_buff)
-        # Plot the historical water data
-        pdf.image(hcf_consump_buff,
-                  w = pdf.epw,
-                  h = (pdf.eph / 2) * 0.9)
-    # If there is no water consumption graph, write that there is no water meter
-    else:
-        pdf.set_font('helvetica', '', 20)
-        pdf.cell(w = 0, 
-                 h = None,
-                 txt = 'This Property does not have a water meter.', 
-                 border = 0, 
-                 align = 'C')
-
-
-    ## Monthly ESPM Metrics
-    pdf.add_page()
-
-    # Add title for the Source EUI and Energy Star Score page
-    pdf.set_font('helvetica', '', 30)
-    pdf.cell(w = 0, 
-             h = 12,
-             txt = 'Source EUI and Energy Star Score', 
-             new_x = 'LEFT',
-             new_y = 'NEXT',
-             align = 'C', 
-             border = 1,
-             fill = True)
-
-    # Add the monthly Source Energy Use Intensity plot
-    seui_buff = io.BytesIO()
-    monthly_seui_plot = graph_seui(monthly_energy.loc[monthly_energy['End Date'] >= earliest_full_data(monthly_kbtu)])
-    monthly_seui_plot.write_image(seui_buff)
-    pdf.image(seui_buff, 
-              w = pdf.epw, 
-              h = (pdf.eph / 2) * 0.9)
-
-    # Add the monthly energy star score
-    es_score_buff = io.BytesIO()
-    monthly_es_plot = graph_es_score(monthly_energy.loc[monthly_energy['End Date'] >= earliest_full_data(monthly_kbtu)])
-    # Check if there is a monthly ES plot - will return None if there is no historical ES scores
-    if monthly_es_plot is not None:
-        monthly_es_plot.write_image(es_score_buff)
-        pdf.image(es_score_buff, 
-                  w = pdf.epw, 
-                  h = (pdf.eph / 2) * 0.9)
-    # If there are no historical ES scores, write that the property does not qualify for an ES score
-    else:
-        pdf.set_font('helvetica', '', 20)
-        pdf.cell(w = 0, 
-                 h = None,
-                 txt = 'This Property does not qualify for an Energy Star Score.', 
-                 border = 0, 
-                 align = 'C')
-
-    ## Monthly consumption by meters
-    pdf.add_page()
-
-    # Add title for the Source EUI and Energy Star Score page
-    pdf.set_font('helvetica', '', 30)
-    pdf.cell(w = 0, 
-             h = 12,
-             txt = 'Monthly Electric and Gas Consumption', 
-             new_x = 'LEFT',
-             new_y = 'NEXT',
-             align = 'C', 
-             border = 1,
-             fill = True)
-
-    # Add the monthly consumption by electric meter
-    e_meter_buff = io.BytesIO()
-    monthly_e_meters = graph_e_meters_overlay(monthly_energy)
-    # Check if there is a monthly electric meter - monthly_e_meters will return None if there is no meter
-    if monthly_e_meters is not None:
-        monthly_e_meters.write_image(e_meter_buff)
-        pdf.image(e_meter_buff, 
-                  w = pdf.epw, 
-                  h = (pdf.eph / 2) * 0.9)
-    # If there is no plot, write that the property does not have an electric meter
-    else:
-        pdf.set_font('helvetica', '', 20)
-        pdf.cell(w = 0, 
-                 h = None,
-                 txt = 'This Property does not contain an electric meter.', 
-                 border = 0, 
-                 align = 'C')
-
-    # Add the monthly consumption by gas meter
-    g_meter_buff = io.BytesIO()
-    monthly_g_meters = graph_g_meters_overlay(monthly_energy)
-    # Cehck if there is a monthly gas consumption plot - monthly_g_meters will return None if there is no gas meters
-    if monthly_g_meters is not None:
-        monthly_g_meters.write_image(g_meter_buff)
-        pdf.image(g_meter_buff, 
-                  w = pdf.epw, 
-                  h = (pdf.eph / 2) * 0.9)
-    # If there is no plot, write that the property does not contain a gas meter
-    else:
-        pdf.set_font('helvetica', '', 20)
-        pdf.cell(w = 0, 
-                 h = None,
-                 txt = 'This Property does not contain a gas meter.', 
-                 border = 0, 
-                 align = 'C')
 
     # Return the Progress and Goals PDF
     return bytes(pdf.output())
