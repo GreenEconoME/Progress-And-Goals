@@ -26,6 +26,8 @@ def get_about_data(prop_id, domain, auth):
     about_data['prop_state'] = prop_info_dict['property']['address']['@state']
     about_data['prop_function'] = prop_info_dict['property']['primaryFunction']
     about_data['prop_sq_ft'] = prop_info_dict['property']['grossFloorArea']['value']
+    about_data['prop_la_id'] = 'None'
+    about_data['prop_ca_id'] = 'None'
 
     # Check if the call for the LA Building ID was successful and appened the id if it did or None if it didn't
     if prop_la_id_dict['additionalIdentifiers'] is not None:
@@ -34,12 +36,13 @@ def get_about_data(prop_id, domain, auth):
             for i in range(len(prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'])):
                 if prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'][i]['additionalIdentifierType']['@name'] == 'Los Angeles Building ID':
                     about_data['prop_la_id'] = prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'][i]['value']
+                if prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'][i]['additionalIdentifierType']['@name'] == 'California Building ID':
+                    about_data['prop_ca_id'] = prop_la_id_dict['additionalIdentifiers']['additionalIdentifier'][i]['value']
         # If there is only one additional identifier, check if it is an LA building id and assign it as the property la id if it is
         elif prop_la_id_dict['additionalIdentifiers']['additionalIdentifier']['additionalIdentifierType']['@name'] == 'Los Angeles Building ID':
             about_data['prop_la_id'] = prop_la_id_dict['additionalIdentifiers']['additionalIdentifier']['value']
-    # If there are no additional identifiers, set the property's la building id to 'None'
-    else:
-        about_data['prop_la_id'] = 'None'
+        elif prop_la_id_dict['additionalIdentifiers']['additionalIdentifier']['additionalIdentifierType']['@name'] == 'California Building ID':
+            about_data['prop_ca_id'] = prop_la_id_dict['additionalIdentifiers']['additionalIdentifier']['value']
         
     # Return the about_data dictionary
     return about_data
