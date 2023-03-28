@@ -699,7 +699,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         pdf.write(txt = f"{about_data['prop_address']} has the Los Angeles Building ID: {about_data['prop_la_id']}. \n\n" + 
                   f"- The compliance due date is Dec 1, {comp_periods[about_data['prop_la_id'][-1]] + 1}.\n\n" +
                   f"- The above benchmarking metrics can be used for the following EBEWE Phase II Exemptions:\n\n"
-                  f"    - Avaliable energy exemptions include a 15% reduction in Weather Normalized Source EUI\n"
+                  f"    - Available energy exemptions include a 15% reduction in Weather Normalized Source EUI\n"
                   f"      and an Energy Star® Score of 75 or higher. \n\n" + 
                   f"    - A 20% reduction in Water Use Intensity can satisfy a water exemption.\n\n"
                   f"- Weather Normalized Source EUI and Water Use Intensity values for Dec 31, {comp_periods[about_data['prop_la_id'][-1]]} " + 
