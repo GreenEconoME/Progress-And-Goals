@@ -12,7 +12,8 @@ def filter_tuple_list(given_list, target_value):
     for x, y in given_list:
         if x == target_value:
             return y
-
+import streamlit as st
+@st.cache
 def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
     # Given the year/month ending date, pull the metrics for the year ending and the previous four years
 

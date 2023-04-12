@@ -52,10 +52,10 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     # Set the background for the top progress and goals section
     start_x = pdf.x
     start_y = pdf.y
-    pdf.set_fill_color(206, 255, 246)
+    pdf.set_fill_color(255, 255, 255)
     pdf.cell(w = pdf.epw, 
              h = pdf.eph / 2,
-             border = 1,
+            #  border = 1,
              txt = '', 
              fill = True
         )
@@ -175,7 +175,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     # Color the Benchmarking Analytics title area
     pdf.set_xy(10, max([prop_type_y, prop_add_y]) + 10)
-    pdf.set_fill_color(93, 189, 119)
+    # pdf.set_fill_color(93, 189, 119)
     pdf.cell(w = pdf.epw, 
              h = 12, 
              txt = '', 
@@ -343,7 +343,8 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
         # Add the best reductions table's title
         pdf.set_font('helvetica', '', 17)
-        pdf.set_fill_color(93, 189, 119)
+        # Old green coloring for headers
+        # pdf.set_fill_color(93, 189, 119)
         pdf.set_y(pdf.y + 3)
         pdf.cell(w = pdf.epw, 
                  h = 11, 
@@ -435,11 +436,12 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
         # Add the Recent energy and water shifts table's title
         pdf.set_font('helvetica', '', 17)
-        pdf.set_fill_color(93, 189, 119)
+        # Old green coloring for headers
+        # pdf.set_fill_color(93, 189, 119)
         pdf.set_y(pdf.y + 3)
         pdf.cell(w = pdf.epw, 
                  h = 11, 
-                 border = 1,
+                #  border = 1,
                  align = 'C',
                  new_x = 'LMARGIN',
                  new_y = 'NEXT',
@@ -509,14 +511,15 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     # Add title for the Energy and Water Consumption plots page
     pdf.set_font('helvetica', '', 30)
-    pdf.set_fill_color(93, 189, 119)
+    # Old green coloring for headers
+    # pdf.set_fill_color(93, 189, 119)
     pdf.cell(w = 0, 
              h = 12,
              txt = 'Energy and Water Consumption', 
              new_x = 'LEFT',
              new_y = 'NEXT',
              align = 'C', 
-             border = 1,
+            #  border = 1,
              fill = True)
 
     # Generate and save the historical kbtu usage
@@ -562,7 +565,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
              new_x = 'LEFT',
              new_y = 'NEXT',
              align = 'C', 
-             border = 1,
+            #  border = 1,
              fill = True)
 
     # Add the monthly Source Energy Use Intensity plot
@@ -602,7 +605,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
              new_x = 'LEFT',
              new_y = 'NEXT',
              align = 'C', 
-             border = 1,
+            #  border = 1,
              fill = True)
 
     # Add the monthly consumption by electric meter
@@ -649,7 +652,8 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
         # Add the title for the EBEWE Compliance dates table
         pdf.set_font('helvetica', '', 20)
-        pdf.set_fill_color(93, 189, 119)
+        # Old green coloring for headers
+        # pdf.set_fill_color(93, 189, 119)
         pdf.cell(w = 0, 
                  h = 12,
                  txt = '**EBEWE Compliance Dates**', 
@@ -691,6 +695,14 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                                max_line_height=pdf.font_size)
             # After each row, create a line break to start the next row beneath
             pdf.ln(line_height)
+
+
+        # Add in the note for the tolled compliance due dates
+        pdf.set_xy(10, pdf.y + 2)
+        pdf.write(txt = ''.join(['* If you did not complete Phase I benchmarking and/or Phase II A/RCx ', 
+                                'requirements during the 2020-2022 tolled deadlines and are now subject to ',
+                                'the reissue due date of September 7, 2023, Green Econome can provide historic ',
+                                'benchmarking and Phase II compliance, to bring your EBEWE status up to date.']))
             
         # Add the compliance information for the current property
         # Set the font size and set the x,y coordinates to add a gap between the dates table and the text
@@ -716,14 +728,15 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             # Add the title for the EBEWE Exemption status section
             pdf.ln(pdf.font_size * 2)
             pdf.set_font('helvetica', '', 20)
-            pdf.set_fill_color(93, 189, 119)
+            # Old green coloring for headers
+            # pdf.set_fill_color(93, 189, 119)
             pdf.cell(w = 0, 
                      h = 12,
                      txt = '**EBEWE Phase II Exemption Status**', 
                      new_x = 'LEFT',
                      new_y = 'NEXT',
                      align = 'C', 
-                     border = 1,
+                    #  border = 1,
                      markdown = True,
                      fill = True)
             
