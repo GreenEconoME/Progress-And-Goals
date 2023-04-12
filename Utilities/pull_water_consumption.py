@@ -3,7 +3,7 @@ import requests
 import xmltodict
 import pandas as pd
 import streamlit as st
-@st.cache
+
 def pull_water_consumption(prop_id, domain, auth):
     # Pull the historical water consumption
     # Get the meters and their associations

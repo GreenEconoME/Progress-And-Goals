@@ -8,7 +8,7 @@ from calendar import monthrange
 import math
 from datetime import datetime
 import streamlit as st
-@st.cache
+
 def pull_monthly_energy(prop_id, domain, auth): 
     # Make a call to get the meter associations for the property   
     meter_associations = requests.get(domain + f'/association/property/{prop_id}/meter', 
