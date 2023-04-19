@@ -1,6 +1,6 @@
 # Import dependencies
 import plotly.graph_objects as go
-
+import plotly.express as px
 
 ###################################
 ###################################
@@ -12,6 +12,7 @@ def graph_eu(kbtu_df, prop_name):
                                y = kbtu_df['Electric kBtu'], 
                                name = 'Electric kBtu', 
                                mode = 'lines+markers',
+                               marker_color = 'blue',
                                hovertemplate = 'Date: %{x}<br>Electric Consumption: %{y:,.0f} kBtu<extra></extra>')
         data.append(elec_kbtu)
         
@@ -19,7 +20,8 @@ def graph_eu(kbtu_df, prop_name):
         gas_kbtu = go.Scatter(x = kbtu_df['End Date'], 
                               y = kbtu_df['Gas kBtu'],  
                               name = 'Gas kBtu',  
-                              mode = 'lines+markers', 
+                              mode = 'lines+markers',
+                              marker_color = 'red', 
                               hovertemplate = 'Date: %{x}<br>Gas Consumption: %{y:,.0f} kBtu<extra></extra>')
         
         data.append(gas_kbtu)
@@ -48,6 +50,7 @@ def graph_hcf(water_df, prop_name):
                     y = water_df['Usage (HCF)'],
                     name = 'HCF Consumption',
                     mode = 'lines+markers', 
+                    marker_color = 'blue', 
                     hovertemplate = 'Month: %{x}<br>Consumption: %{y:,.0f} HCF<extra></extra>')
 
             hcf_trace_2 = go.Scatter(
@@ -56,6 +59,7 @@ def graph_hcf(water_df, prop_name):
                     name = 'Monthly Average',
                     line_dash = 'dash',
                     mode = 'lines', 
+                    marker_color = 'red', 
                     hovertemplate = 'Monthly Average: %{y:,.1f} HCF<extra></extra>')
 
             data = [hcf_trace_1, hcf_trace_2]
@@ -78,11 +82,13 @@ def graph_hcf(water_df, prop_name):
                     usage_columns.append(col)
 
             fig = go.Figure()
-            for col in usage_columns:
+            colors = px.colors.qualitative.Plotly
+            for count, col in enumerate(usage_columns):
                 fig.add_trace(go.Scatter(x = water_df.dropna(subset = usage_columns, how = 'all')['End Date'],
                                          y = water_df.dropna(subset = usage_columns, how = 'all')[col],
                                          name = col,
                                          mode = 'lines+markers',
+                                         marker_color = colors[count % (len(colors) - 1)],
                                          hovertemplate = '%{y:,.0f} HCF'))
 
             fig.update_layout(
@@ -110,7 +116,8 @@ def graph_es_score(energy_df):
         es_trace = go.Scatter(x = energy_df.loc[11:, 'End Date'], 
                               y = energy_df['Energy Star Score'], 
                               name = 'Energy Star® Score', 
-                              mode = 'lines+markers', 
+                              mode = 'lines+markers',
+                              marker_color = 'blue', 
                               hovertemplate = 'Date: %{x}<br>Energy Star Score: %{y}<extra></extra>')
 
         es_trace_2 = go.Scatter(x = energy_df['End Date'],
@@ -139,6 +146,7 @@ def graph_seui(energy_df):
                         y = energy_df['Weather Normalized Source EUI (kBtu/ft²)'], 
                         name = 'Building Energy Use Intensity (EUI)', 
                         mode = 'lines+markers', 
+                        marker_color = 'blue',
                         hovertemplate = 'Date: %{x}<br>WN Source EUI: %{y} (kBtu/ft²)<extra></extra>')
     
     # Create a trace for the national median source eui
@@ -146,6 +154,7 @@ def graph_seui(energy_df):
                                 y = energy_df['National Median Source EUI (kBtu/ft²)'], 
                                 name = 'National Median Source EUI', 
                                 mode = 'lines+markers', 
+                                marker_color = 'red',
                                 hovertemplate = 'Date: %{x}<br>Nat. Med. Source EUI: %{y} (kBtu/ft²)<extra></extra>')
     
     # Add the traces to the data list
@@ -174,11 +183,13 @@ def graph_e_meters_overlay(energy_df):
             
     fig = go.Figure()
     # Iterate through the columns that contain kWh and create a trace for each one
-    for col in usage_columns:
+    colors = px.colors.qualitative.Plotly
+    for count, col in enumerate(usage_columns):
         fig.add_trace(go.Scatter(x = energy_df.dropna(subset = usage_columns, how = 'all')['End Date'],
                                  y = energy_df.dropna(subset = usage_columns, how = 'all')[col],
                                  name = col,
                                  mode = 'lines+markers',
+                                 marker_color = colors[count % (len(colors) - 1)],
                                  hovertemplate = '%{y:,.0f} kWh'))
         
     fig.update_layout(hovermode = 'x unified', 
@@ -204,11 +215,13 @@ def graph_g_meters_overlay(energy_df):
             
     fig = go.Figure()
     # Iterate through the columns that contain 'therm' and create a trace for each to plot
-    for col in usage_columns:
+    colors = px.colors.qualitative.Plotly
+    for count, col in enumerate(usage_columns):
         fig.add_trace(go.Scatter(x = energy_df.dropna(subset = usage_columns, how = 'all')['End Date'],
                                  y = energy_df.dropna(subset = usage_columns, how = 'all')[col],
                                  name = col,
                                  mode = 'lines+markers',
+                                 marker_color = colors[count % (len(colors) - 1)],
                                  hovertemplate = '%{y:,.0f} Therms'))
         
     fig.update_layout(hovermode = 'x unified', 
