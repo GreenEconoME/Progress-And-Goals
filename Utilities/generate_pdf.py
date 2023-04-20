@@ -202,12 +202,18 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     ##### Write in the benchmarking analytics table
     # Create a copy of the annual metrics to format for displaying
+    if 'Weather Normalized Source Energy Use Intensity ' in ann_metrics.columns:
+        ann_metrics.rename(columns = {'Weather Normalized Source Energy Use Intensity ' : 'Weather Normalized Source Energy Use Intensity kBtu/ft²'}, 
+                            inplace = True)
     plot_metrics_df = copy.deepcopy(ann_metrics)
     if about_data['prop_function'] != 'Multifamily Housing':
         plot_metrics_df.drop(columns = ['Water Score (Multifamily Only)'], inplace = True)
 
-    # Drop the columns that are not used in consultations
-    plot_metrics_df.drop(columns = ['Weather Normalized Source Energy Use kBtu'], inplace = True)
+    ## Drop the columns that are not used in consultations
+    # Iterate through the possible columns for wnseu, if not available won't have units
+    for col in ['Weather Normalized Source Energy Use kBtu', 'Weather Normalized Source Energy Use ']:
+        if col in plot_metrics_df.columns:
+            plot_metrics_df.drop(columns = [col], inplace = True)
     # Drop the National Median Source Energy Use and Total Water Use columns (units don't get pulled if there is no data)
     plot_metrics_df = plot_metrics_df.loc[:,~plot_metrics_df.columns.str.contains('^National Median Source Energy Use', case=False)]
     plot_metrics_df = plot_metrics_df.loc[:,~plot_metrics_df.columns.str.contains('^Total Water Use', case=False)]
