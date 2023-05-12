@@ -46,12 +46,18 @@ def pull_water_consumption(prop_id, domain, auth):
 
                 # Create a dataframe from the energy meter consumption
                 water_data = []
-                for i in range(len(water_consumption['meterData']['meterConsumption'])):
+                if type(water_consumption) == dict:
                     monthly_data = {}
-                    monthly_data['End Date'] = water_consumption['meterData']['meterConsumption'][i]['endDate']
-                    monthly_data[meter_descriptor] = water_consumption['meterData']['meterConsumption'][i]['usage']
-
+                    monthly_data['End Date'] = water_consumption['meterData']['meterConsumption']['endDate']
+                    monthly_data[meter_descriptor] = water_consumption['meterData']['meterConsumption']['usage']
                     water_data.append(monthly_data)
+                else:
+                    for i in range(len(water_consumption['meterData']['meterConsumption'])):
+                        monthly_data = {}
+                        monthly_data['End Date'] = water_consumption['meterData']['meterConsumption'][i]['endDate']
+                        monthly_data[meter_descriptor] = water_consumption['meterData']['meterConsumption'][i]['usage']
+
+                        water_data.append(monthly_data)
 
                 # Create the water dataframe
                 meter_df = pd.DataFrame(water_data)
@@ -153,12 +159,18 @@ def pull_water_consumption(prop_id, domain, auth):
 
             # Create a dataframe from the water meter consumption
             water_data = []
-            for i in range(len(water_consumption['meterData']['meterConsumption'])):
-                monthly_data = {}
-                monthly_data['End Date'] = water_consumption['meterData']['meterConsumption'][i]['endDate']
-                monthly_data['Usage (HCF)'] = water_consumption['meterData']['meterConsumption'][i]['usage']
+            if type(water_consumption) == dict:
+                    monthly_data = {}
+                    monthly_data['End Date'] = water_consumption['meterData']['meterConsumption']['endDate']
+                    monthly_data['Usage (HCF)'] = water_consumption['meterData']['meterConsumption']['usage']
+                    water_data.append(monthly_data)
+            else:
+                for i in range(len(water_consumption['meterData']['meterConsumption'])):
+                    monthly_data = {}
+                    monthly_data['End Date'] = water_consumption['meterData']['meterConsumption'][i]['endDate']
+                    monthly_data['Usage (HCF)'] = water_consumption['meterData']['meterConsumption'][i]['usage']
 
-                water_data.append(monthly_data)
+                    water_data.append(monthly_data)
 
             # Create the water dataframe
             water_df = pd.DataFrame(water_data)
