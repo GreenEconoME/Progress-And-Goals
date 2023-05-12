@@ -169,7 +169,7 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
     annual_df = pd.DataFrame(annual_metrics)
     
     # Drop the rows for the years that there is no data
-    annual_df.dropna(thresh = 7, inplace = True)
+    annual_df.dropna(thresh = 5, inplace = True)
     
     # Sort the values of the annual metrics by ascending Year Ending values
     annual_df.sort_values(by = 'Year Ending', ascending = True, inplace = True)
