@@ -159,7 +159,7 @@ def pull_water_consumption(prop_id, domain, auth):
 
             # Create a dataframe from the water meter consumption
             water_data = []
-            if type(water_consumption) == dict:
+            if type(water_consumption['meterData']['meterConsumption']) == dict:
                     monthly_data = {}
                     monthly_data['End Date'] = water_consumption['meterData']['meterConsumption']['endDate']
                     monthly_data['Usage (HCF)'] = water_consumption['meterData']['meterConsumption']['usage']
