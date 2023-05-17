@@ -147,7 +147,7 @@ def pull_water_consumption(prop_id, domain, auth):
             water_df['End Date'] = pd.to_datetime(water_df['End Date'])
 
             # Insert a total water consumption column
-            water_df.insert(1, 'Total HCF Consumption', water_df.sum(axis = 1))
+            water_df.insert(1, 'Total HCF Consumption', water_df.sum(axis = 1, numeric_only=True))
             
         else:
             # Get consumption data for the water meter
