@@ -6,7 +6,6 @@ from calendar import monthrange
 import numpy as np
 import pandas as pd
 import math
-import streamlit as st
 
 # Create helper function to sort the best WNSEUI and WUI changes the first four years and the last year in compliance period
 def filter_tuple_list(given_list, target_value):
