@@ -6,6 +6,7 @@ from calendar import monthrange
 import numpy as np
 import pandas as pd
 import math
+import streamlit as st
 
 # Create helper function to sort the best WNSEUI and WUI changes the first four years and the last year in compliance period
 def filter_tuple_list(given_list, target_value):
@@ -167,15 +168,14 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
 
     # Create a dataframe from the pulled metrics
     annual_df = pd.DataFrame(annual_metrics)
-    
     # Drop the rows for the years that there is no data
     # Create a threshold to drop by to account for the AB802 properties without water
     if annual_df.dropna(thresh = 7).shape[0] == 0:
         threshold = 5
     else:
-        threshold = 7
+        threshold = 6
     annual_df.dropna(thresh = threshold, inplace = True)
-    
+    st.dataframe(annual_df)
     # Sort the values of the annual metrics by ascending Year Ending values
     annual_df.sort_values(by = 'Year Ending', ascending = True, inplace = True)
     
@@ -214,7 +214,7 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
         # Save the best eui percent change and the corresponding year
         best_wui_change_year = filter_tuple_list(wui_percent_changes, min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0])
         best_wui_change_value = round(min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0] * 100, 2)
-    
+
     else:
         best_eui_change_year = annual_df['Year Ending'].item().strftime('%m/%d/%Y')
         best_eui_change_value = 0
