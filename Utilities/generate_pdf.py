@@ -432,17 +432,19 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         try:
             wui_shift = round((latest_wui - previous_wui) / previous_wui * 100, 2)
         except ZeroDivisionError:
-            wui_shift = np.nan
+            wui_shift = 'UNDEF'
 
         # Check if the shifts are available, if not replace with N/A
         if math.isnan(wnseui_shift):
             wnseui_shift = 'N/A'
         else:
             wnseui_shift = str(wnseui_shift) + '% shift'
-        if math.isnan(wui_shift):
-            wui_shift = 'N/A'
-        else:
-            wui_shift = str(wui_shift) + '% shift'
+        # Check first that it wasn't a zero division error
+        if wui_shift != 'UNDEF':
+            if math.isnan(wui_shift):
+                wui_shift = 'N/A'
+            else:
+                wui_shift = str(wui_shift) + '% shift'
 
         # Add the Recent energy and water shifts table's title
         pdf.set_font('helvetica', '', 17)

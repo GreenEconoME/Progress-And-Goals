@@ -222,7 +222,7 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
         # best_wui_change_value = round(min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0] * 100, 2)
         if filter_tuple_list(wui_percent_changes, min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0]) == None:
             best_wui_change_year = wui_percent_changes[-1][1]
-            best_wui_change_value = 'N/A'
+            best_wui_change_value = 'UNDEF'
         else:
             best_wui_change_year = filter_tuple_list(wui_percent_changes, min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0])
             best_wui_change_value = round(min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0] * 100, 2)
