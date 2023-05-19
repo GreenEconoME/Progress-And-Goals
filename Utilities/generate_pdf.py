@@ -9,6 +9,7 @@ import pandas as pd
 from Utilities.plot_metrics import (graph_eu, graph_hcf, graph_es_score, 
                             graph_seui, graph_e_meters_overlay, 
                             graph_g_meters_overlay)
+import streamlit as st
 
 def earliest_full_data(df):
     # Check if there is both electric and gas data
@@ -428,7 +429,10 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             previous_wui = float(ann_metrics.filter(like = 'Water Use Intensity').iloc[-2])
         except IndexError:
             previous_wui = latest_wui
-        wui_shift = round((latest_wui - previous_wui) / previous_wui * 100, 2)
+        try:
+            wui_shift = round((latest_wui - previous_wui) / previous_wui * 100, 2)
+        except ZeroDivisionError:
+            wui_shift = np.nan
 
         # Check if the shifts are available, if not replace with N/A
         if math.isnan(wnseui_shift):

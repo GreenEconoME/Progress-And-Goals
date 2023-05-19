@@ -175,7 +175,7 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
     else:
         threshold = 6
     annual_df.dropna(thresh = threshold, inplace = True)
-    st.dataframe(annual_df)
+
     # Sort the values of the annual metrics by ascending Year Ending values
     annual_df.sort_values(by = 'Year Ending', ascending = True, inplace = True)
     
@@ -208,13 +208,24 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
         for year in annual_df['Year Ending'].iloc[:-1]:
             current_value = float(annual_df.loc[annual_df['Year Ending'] == year, f'Water Use Intensity {units_of_metrics[5]}'].item())
             
-            # Append the percent change and the year to the percent changes list                      
-            wui_percent_changes.append(((final_value - current_value) / current_value, year.strftime('%m/%d/%Y')))
+            # Append the percent change and the year to the percent changes list      
+            try:                
+                wui_percent_changes.append(((final_value - current_value) / current_value, year.strftime('%m/%d/%Y')))
+            except ZeroDivisionError:
+                if final_value != 0:
+                    wui_percent_changes.append((np.nan, year.strftime('%m/%d/%Y')))
+                else:
+                    wui_percent_changes.append((float('inf'), year.strftime('%m/%d/%Y')))
         
         # Save the best eui percent change and the corresponding year
-        best_wui_change_year = filter_tuple_list(wui_percent_changes, min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0])
-        best_wui_change_value = round(min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0] * 100, 2)
-
+        # best_wui_change_year = filter_tuple_list(wui_percent_changes, min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0])
+        # best_wui_change_value = round(min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0] * 100, 2)
+        if filter_tuple_list(wui_percent_changes, min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0]) == None:
+            best_wui_change_year = wui_percent_changes[-1][1]
+            best_wui_change_value = 'N/A'
+        else:
+            best_wui_change_year = filter_tuple_list(wui_percent_changes, min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0])
+            best_wui_change_value = round(min(wui_percent_changes, key = lambda x: float('inf') if math.isnan(x[0]) else x[0])[0] * 100, 2)
     else:
         best_eui_change_year = annual_df['Year Ending'].item().strftime('%m/%d/%Y')
         best_eui_change_value = 0
