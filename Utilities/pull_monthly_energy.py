@@ -47,13 +47,21 @@ def pull_monthly_energy(prop_id, domain, auth):
 
         # Create a dataframe from the energy meter consumption
         energy_data = []
-        # Iterate through the energy consumption call, and store the usage for each date into a dictionary to append the the energy_data list
-        for i in range(len(energy_consumption['meterData']['meterConsumption'])):
+        # If there is a single entry for the meter, it will return a dictionary for the single entry
+        if isinstance(energy_consumption['meterData']['meterConsumption'], dict):
             monthly_data = {}
-            monthly_data['End Date'] = energy_consumption['meterData']['meterConsumption'][i]['endDate']
-            monthly_data[meter_descriptor] = energy_consumption['meterData']['meterConsumption'][i]['usage']
+            monthly_data['End Date'] = energy_consumption['meterData']['meterConsumption']['endDate']
+            monthly_data[meter_descriptor] = energy_consumption['meterData']['meterConsumption']['usage']
 
             energy_data.append(monthly_data)
+        else:
+            # Iterate through the energy consumption call, and store the usage for each date into a dictionary to append the the energy_data list
+            for i in range(len(energy_consumption['meterData']['meterConsumption'])):
+                monthly_data = {}
+                monthly_data['End Date'] = energy_consumption['meterData']['meterConsumption'][i]['endDate']
+                monthly_data[meter_descriptor] = energy_consumption['meterData']['meterConsumption'][i]['usage']
+
+                energy_data.append(monthly_data)
 
         # Create the energy dataframe for this meter
         meter_df = pd.DataFrame(energy_data)
