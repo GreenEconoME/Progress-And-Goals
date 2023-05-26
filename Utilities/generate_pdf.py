@@ -390,6 +390,11 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         # Add the EBEWE reduction best shifts - WNSEUI Shift
         # Old coloring
         # pdf.set_fill_color(93, 129, 119)
+        # Add a check if there was no best_eui_change_year and value
+        # This occurs when there is no WNSEUI for the year generated
+        if (best_eui_change_year == None) and (best_eui_change_value != best_eui_change_value):
+            best_eui_change_year = str(year_ending)
+            best_eui_change_value = 'NA'
         pdf.set_fill_color(255, 255, 255)
         pdf.set_font('helvetica', '', 11)
         pdf.cell(w = pdf.epw / 2, 
@@ -764,7 +769,10 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             else:
                 es_message = f"- Did not achieve an Energy Star® Score of 75 or above."
             # Check if there was at least a 15% reduction in WNSEUI
-            if best_eui_change_value <= -15:
+            # Check first if we have reassigned best_eui_change_value to NA if it was not available during the year ending
+            if best_eui_change_value == 'NA':
+                eui_message = f"- Weather Normalized Source EUI not available to check reduction."
+            elif best_eui_change_value <= -15:
                 eui_message = (f"- Satisfied the 15% Weather Normalized Source Energy Use Intensity Reduction.\n" + 
                                f"- From {best_eui_change_year.split('/')[-1]} to {year_ending}: {best_eui_change_value}% reduction.")
             else:
