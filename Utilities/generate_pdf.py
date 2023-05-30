@@ -727,7 +727,9 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         pdf.set_xy(10, pdf.y + 15)
         pdf.write(txt = f"{about_data['prop_address']} has the Los Angeles Building ID: {about_data['prop_la_id']}. \n\n" + 
                   f"- The compliance due date is Dec 1, {comp_periods[about_data['prop_la_id'][-1]] + 1}.\n\n" +
-                  f"- The above benchmarking metrics can be used for the following EBEWE Phase II Exemptions:\n\n"
+                  f"- The above benchmarking metrics can be used for the following EBEWE Phase II Exemptions\n"
+                  f"  (if the reductions or score is met during the applicable EBEWE Phase II 5 year comparative\n"
+                  f"  period.):\n\n"
                   f"    - Available energy exemptions include a 15% reduction in Weather Normalized Source EUI\n"
                   f"      and an Energy Star® Score of 75 or higher. \n\n" + 
                   f"    - A 20% reduction in Water Use Intensity can satisfy a water exemption.\n\n"
@@ -778,7 +780,9 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             else:
                 eui_message = f"- Did not satisfy the 15% reduction for Weather Normalized Source EUI."
             # Check if there was at least a 20% reduction in WUI
-            if best_wui_change_value <= -20:
+            if best_wui_change_value == 'UNDEF':
+                wui_message = f"- Did not Satisfy the 20% reduction for Water Use Intensity."
+            elif best_wui_change_value <= -20:
                 wui_message = ("- Satisfied the 20% Water Use Intensity Reduction.\n" + 
                                f"- From {best_wui_change_year.split('/')[-1]} to {year_ending}: {best_wui_change_value}% reduction.")
             else:
