@@ -144,50 +144,5 @@ def pull_monthly_energy(prop_id, domain, auth):
     energy_df.sort_values(by = 'End Date', ascending = False, inplace = True)
     energy_df.reset_index(drop = True, inplace = True)
 
-    # Loop through the dates to get the historical monthly energy metrics
-    for row in energy_df.index:
-        energy_metrics = requests.get(domain + f"/property/{prop_id}/metrics?year={energy_df.loc[row, 'End Date'].year}&month={energy_df.loc[row, 'End Date'].month}&measurementSystem=EPA", 
-                                      headers = {'PM-Metrics': 'score, sourceTotalWN, medianSourceTotal, sourceIntensityWN, medianSourceIntensity'}, 
-                                      auth = auth)
-
-        # Parse the historical call
-        energy_metrics_dict = xmltodict.parse(energy_metrics.content)
-
-        # For each metric in the energy_metrics_dict,
-        # Check if the metric exists, and add it to the corresponding column
-        # If the metric does not exist, fill the value with a nan
-        if type(energy_metrics_dict['propertyMetrics']['metric'][0]['value']) == str:
-            energy_df.loc[row, 'Energy Star Score'] = energy_metrics_dict['propertyMetrics']['metric'][0]['value']
-        else:
-            energy_df.loc[row, 'Energy Star Score'] = np.nan
-
-        if type(energy_metrics_dict['propertyMetrics']['metric'][1]['value']) == str:
-            energy_df.loc[row, 'Weather Normalized Source EU (kBtu)'] = energy_metrics_dict['propertyMetrics']['metric'][1]['value']
-        else:
-            energy_df.loc[row, 'Weather Normalized Source EU (kBtu)'] = np.nan
-
-        if type(energy_metrics_dict['propertyMetrics']['metric'][2]['value']) == str:
-            energy_df.loc[row, 'National Median Source Energy Use (kBtu)'] = energy_metrics_dict['propertyMetrics']['metric'][2]['value']
-        else:
-            energy_df.loc[row, 'National Median Source Energy Use (kBtu)'] = np.nan
-
-        if type(energy_metrics_dict['propertyMetrics']['metric'][3]['value']) == str:
-            energy_df.loc[row, 'Weather Normalized Source EUI (kBtu/ft²)'] = energy_metrics_dict['propertyMetrics']['metric'][3]['value']
-        else:
-            energy_df.loc[row, 'Weather Normalized Source EUI (kBtu/ft²)'] = np.nan
-
-        if type(energy_metrics_dict['propertyMetrics']['metric'][4]['value']) == str:
-            energy_df.loc[row, 'National Median Source EUI (kBtu/ft²)'] = energy_metrics_dict['propertyMetrics']['metric'][4]['value']
-        else:
-            energy_df.loc[row, 'National Median Source EUI (kBtu/ft²)'] = np.nan
-
-
-    # Format the datatype of the Energy Metric columns
-    energy_df['Energy Star Score'] = pd.to_numeric(energy_df['Energy Star Score'])
-    energy_df['Weather Normalized Source EU (kBtu)'] = pd.to_numeric(energy_df['Weather Normalized Source EU (kBtu)'])
-    energy_df['National Median Source Energy Use (kBtu)'] = pd.to_numeric(energy_df['National Median Source Energy Use (kBtu)'])
-    energy_df['Weather Normalized Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_df['Weather Normalized Source EUI (kBtu/ft²)'])
-    energy_df['National Median Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_df['National Median Source EUI (kBtu/ft²)'])
-
             
     return energy_df
