@@ -5,10 +5,11 @@ import copy
 import io
 from datetime import date
 import math
+import calendar
 import pandas as pd
 from Utilities.plot_metrics import (graph_eu, graph_hcf, graph_es_score, 
-                            graph_seui, graph_e_meters_overlay, 
-                            graph_g_meters_overlay)
+                                    graph_seui, graph_e_meters_overlay, 
+                                    graph_g_meters_overlay)
 import streamlit as st
 
 def earliest_full_data(df):
@@ -24,10 +25,8 @@ def earliest_full_data(df):
 
 # Using the fpdf library, generate a progress and goals report for the selected property
 def generate_pdf(about_data, ann_metrics, prop_id, 
-                year_ending, best_eui_change_year, 
-                best_eui_change_value, best_wui_change_year, 
-                best_wui_change_value, monthly_kbtu, water_df, 
-                monthly_energy):
+                 year_ending, monthly_kbtu, water_df, 
+                 monthly_energy, reissued_check, reissued_date = None):
 
     class PDF(FPDF):
         def footer(self):
@@ -242,41 +241,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  border = 1,
                  fill = True
             )
-    ## Old coloring (green for energy, blue for water, yellow/gold for GHG)
-    # Iterate through where the table will be and color the energy, water and ghg rows
-    # Color for non-multifamily props
-    # if about_data['prop_function'] != 'Multifamily Housing':
-    #     for i in range(plot_metrics_df.shape[0]):
-    #         # Set the x, y coordinates, each iteration the x is to the left and the y shifts down by one line height defined above
-    #         pdf.set_xy(post_analytics_title_x, post_analytics_title_y + line_height * i)
-    #         # Color the energy related rows shades of green
-    #         if i <= 3:
-    #             color_rows(r1 = 93, g1 = 149, b1 = 119, r2 = 93, g2 = 129, b2 = 119, 
-    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
-    #         # Color the water related rows shades of blue
-    #         elif i <= 4:
-    #             color_rows(r1 = 74, g1 = 197, b1 = 199, r2 = 65, g2 = 169, b2 = 171, 
-    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
-    #         # Color the GHG rows shades of yellow-green
-    #         else:
-    #             color_rows(r1 = 164, g1 = 209, b1 = 86, r2 = 148, g2 = 189, b2 = 77, 
-    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
-    # else:
-    #     for i in range(plot_metrics_df.shape[0]):
-    #         # Set the x, y coordinates, each iteration the x is to the left and the y shifts down by one line height defined above
-    #         pdf.set_xy(post_analytics_title_x, post_analytics_title_y + line_height * i)
-    #         # Color the energy related rows shades of green
-    #         if i <= 3:
-    #             color_rows(r1 = 93, g1 = 149, b1 = 119, r2 = 93, g2 = 129, b2 = 119, 
-    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
-    #         # Color the water related rows shades of blue
-    #         elif i <= 5:
-    #             color_rows(r1 = 74, g1 = 197, b1 = 199, r2 = 65, g2 = 169, b2 = 171, 
-    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
-    #         # Color the GHG rows shades of yellow-green
-    #         else:
-    #             color_rows(r1 = 164, g1 = 209, b1 = 86, r2 = 148, g2 = 189, b2 = 77, 
-    #                     iteration = i, current_line_height = line_height, pdf_width = pdf.epw)
+
     for i in range(plot_metrics_df.shape[0]):
         pdf.set_xy(post_analytics_title_x, post_analytics_title_y + line_height * i)
         color_rows(r1 = 237, g1 = 237, b1 = 237, r2 = 255, g2 = 255, b2 = 255, 
@@ -344,6 +309,21 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                     '8' : 2024, 
                     '9' : 2024}
     
+    # Check if the reissued dates are being used
+    # If they are, change the ids ending in 0, 1, 2, 3 to have a 2023 compliance year
+    if reissued_check:
+        comp_periods = {'0' : 2022,
+                        '1' : 2022, 
+                        '2' : 2022, 
+                        '3' : 2022, 
+                        '4' : 2022, 
+                        '5' : 2022, 
+                        '6' : 2023, 
+                        '7' : 2023, 
+                        '8' : 2024, 
+                        '9' : 2024}
+    
+    
     # Check if there is an LADBS Building ID, and if the last digit corresponds with the last year of the compliance period
     if about_data['prop_la_id'] != 'None' and comp_periods[about_data['prop_la_id'][-1]] == int(year_ending):
         ## Add the EBEWE reduction metrics
@@ -388,13 +368,108 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  txt = 'Water Use Intensity')
 
         # Add the EBEWE reduction best shifts - WNSEUI Shift
+        
+        # Filter the monthly energy dataframe down to the years that will be used to compare to the compliance period
+        # i.e. the last month of the comparative period and the next 11 months
+        # If the reissued dates are being used, change the filter for the months that will be used
+        # to check if a satisfactory exemption is met
+        if reissued_check:
+            ## Need to create different masks for 0,1 and 2,3 (shifted one month)
+            if reissued_date == 'September 7, 2023':
+                start_mask = (monthly_energy['End Date'] >= f'10-31-{year_ending}')
+                end_mask = (monthly_energy['End Date'] <= f'8-31-{year_ending + 1}')
+            elif reissued_date == 'October 7, 2023':
+                start_mask = (monthly_energy['End Date'] >= f'11-30-{year_ending}')
+                end_mask = (monthly_energy['End Date'] <= f'9-30-{year_ending + 1}')
+            # If the ladbs id doesn't end in 0,1,2, or 3, then the comparative period remains the same
+            else:
+                start_mask = (monthly_energy['End Date'] >= f'12-31-{year_ending}')
+                end_mask = (monthly_energy['End Date'] <= f'11-30-{year_ending + 1}')
+        else:
+            start_mask = (monthly_energy['End Date'] >= f'12-31-{year_ending}')
+            end_mask = (monthly_energy['End Date'] <= f'11-30-{year_ending + 1}')
+
+        # Create a temp_df that holds the months that will be used to compare to the months in the comparative period
+        temp_df = monthly_energy.loc[start_mask & end_mask]
+        temp_df.reset_index(drop = True, inplace = True)
+
+        # Create a list to hold the eui info for each month/year for the baseline periods
+        eui_values = []
+        # For each available eui in the period we will compare, gather that months eui for the previous years
+        for index, row in temp_df.iterrows():
+            for i in range(1, 5):
+                eui_data = {}
+
+                eui_data['Recent Year'] = row['End Date'].year
+                eui_data['Recent Month'] = row['End Date'].month
+                eui_data['Recent WNSEUI'] = row['Weather Normalized Source EUI (kBtu/ft²)']
+
+                year_mask = (monthly_energy['End Date'].dt.year == (row['End Date'].year - i))
+                month_mask = (monthly_energy['End Date'].dt.month == row['End Date'].month)
+
+
+                eui_data['Comparative Year'] = row['End Date'].year - i
+                eui_data['Comparative Month'] = row['End Date'].month
+                eui_data['Comparative WNSEUI'] = monthly_energy.loc[year_mask & month_mask, 'Weather Normalized Source EUI (kBtu/ft²)'].item()
+                eui_values.append(eui_data)
+
+
+        # Create a dataframe of the EUI values     
+        comparative_eui_df = pd.DataFrame(eui_values)
+        # Crete a column that contains the shift from the baseline to the recent month
+        comparative_eui_df['EUI Shift'] = (comparative_eui_df['Recent WNSEUI'] - comparative_eui_df['Comparative WNSEUI']) / comparative_eui_df['Comparative WNSEUI']
+        # Sort the dataframe by the EUI shift and reset the index
+        comparative_eui_df.sort_values(by = 'EUI Shift', inplace = True)
+        comparative_eui_df.reset_index(drop = True, inplace = True)
+
+        # Get the best eui shift and the period (from and to)
+        best_eui_shift = round(comparative_eui_df.loc[0, 'EUI Shift'].item() * 100, 2)
+        best_eui_from = f"{calendar.month_abbr[comparative_eui_df.loc[0, 'Comparative Month'].item()]} {comparative_eui_df.loc[0, 'Comparative Year'].item()}"
+        best_eui_to = f"{calendar.month_abbr[comparative_eui_df.loc[0, 'Recent Month'].item()]} {comparative_eui_df.loc[0, 'Recent Year'].item()}"
+        
+        # Filter the monthly water dataframe down to the years that will be used to compare to the compliance period
+        # i.e. the last month of the comparative period and the next 11 months
+        temp_df = water_df.loc[(water_df['End Date'] >= f'12-31-{year_ending}') & (water_df['End Date'] <= f'11-30-{year_ending + 1}')]
+        temp_df.reset_index(drop = True, inplace = True)
+
+        # Create a list to hold the wui info for each month/year for the baseline periods
+        wui_values = []
+        # For each available wui in the period we will compare, gather that months wui for the previous years
+        for index, row in temp_df.iterrows():
+            for i in range(1, 5):
+                wui_data = {}
+
+                wui_data['Recent Year'] = row['End Date'].year
+                wui_data['Recent Month'] = row['End Date'].month
+                wui_data['Recent WUI'] = row['Water Use Intensity']
+
+                year_mask = (water_df['End Date'].dt.year == (row['End Date'].year - i))
+                month_mask = (water_df['End Date'].dt.month == row['End Date'].month)
+
+
+                wui_data['Comparative Year'] = row['End Date'].year - i
+                wui_data['Comparative Month'] = row['End Date'].month
+                wui_data['Comparative WUI'] = water_df.loc[year_mask & month_mask, 'Water Use Intensity'].item()
+                wui_values.append(wui_data)
+
+
+        # Create a dataframe of the WUI values     
+        comparative_wui_df = pd.DataFrame(wui_values)
+        # Crete a column that contains the shift from the baseline to the recent month
+        comparative_wui_df['WUI Shift'] = (comparative_wui_df['Recent WUI'] - comparative_wui_df['Comparative WUI']) / comparative_wui_df['Comparative WUI']
+        # Sort the dataframe by the WUI shift and reset the index
+        comparative_wui_df.sort_values(by = 'WUI Shift', inplace = True)
+        comparative_wui_df.reset_index(drop = True, inplace = True)
+
+        # Get the best wui shift and the period (from and to)
+        best_wui_shift = round(comparative_wui_df.loc[0, 'WUI Shift'].item() * 100, 2)
+        best_wui_from = f"{calendar.month_abbr[comparative_wui_df.loc[0, 'Comparative Month'].item()]} {comparative_wui_df.loc[0, 'Comparative Year'].item()}"
+        best_wui_to = f"{calendar.month_abbr[comparative_wui_df.loc[0, 'Recent Month'].item()]} {comparative_wui_df.loc[0, 'Recent Year'].item()}"
+
         # Old coloring
         # pdf.set_fill_color(93, 129, 119)
         # Add a check if there was no best_eui_change_year and value
         # This occurs when there is no WNSEUI for the year generated
-        if (best_eui_change_year == None) and (best_eui_change_value != best_eui_change_value):
-            best_eui_change_year = str(year_ending)
-            best_eui_change_value = 'NA'
         pdf.set_fill_color(255, 255, 255)
         pdf.set_font('helvetica', '', 11)
         pdf.cell(w = pdf.epw / 2, 
@@ -404,7 +479,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  new_x = 'RIGHT',
                  new_y = 'TOP',
                  fill = True,
-                 txt = f'From {best_eui_change_year.split("/")[-1]} to {year_ending}: {best_eui_change_value}% shift')
+                 txt = f'From {best_eui_from} to {best_eui_to}: {best_eui_shift}% shift')
 
         # Add the EBEWE reduction best shifts - WUI Shift
         pdf.cell(w = pdf.epw / 2, 
@@ -414,7 +489,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  new_x = 'RIGHT',
                  new_y = 'TOP',
                  fill = True,
-                 txt = f'From {best_wui_change_year.split("/")[-1]} to {year_ending}: {best_wui_change_value}% shift')
+                 txt = f'From {best_wui_from} to {best_wui_to}: {best_wui_shift}% shift')
 
      # If it is not the end of the building's compliance period,
      # Add the recent (last two years pulled) shift for WUI and WNSEUI 
@@ -686,6 +761,21 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
         # Read in the EBEWE Dates excel file
         ebewe_dates = pd.read_excel('Resources/EBEWE Dates.xlsx', header = None)
+        # If using the reissed dates, alter the cells for the compliance due dates of the 0/1, 2/3 buildings
+        if reissued_check:
+            if reissued_date == 'September 7, 2023':
+                comp_due_date = 'Sept 7, 2023*'
+                comp_period_message = 'Data must not be older than 9/7/2018*'
+            else:
+                comp_due_date = 'Oct 7, 2023*'
+                comp_period_message = 'Data must not be older than 10/7/2018*'
+            # Change the complince due date
+            ebewe_dates.at[1, 1] = comp_due_date
+            ebewe_dates.at[2, 1] = comp_due_date
+            # Change the comparative period earliest data date
+            ebewe_dates.at[1, 3] = comp_period_message
+            ebewe_dates.at[2, 3] = comp_period_message
+
         # Save the column width to distribute the columns evenly across the page
         col_width = pdf.epw / len(ebewe_dates.columns)
         # Iterate through the rows and columns of the table to create a cell for each value in the table
@@ -714,33 +804,34 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             pdf.ln(line_height)
 
 
-        # Add in the note for the tolled compliance due dates
-        pdf.set_xy(10, pdf.y + 2)
-        pdf.write(txt = ''.join(['* If you did not complete Phase I benchmarking and/or Phase II A/RCx ', 
-                                'requirements during the 2020-2022 tolled deadlines and are now subject to ',
-                                'the reissue due date of September 7, 2023, Green Econome can provide historic ',
-                                'benchmarking and Phase II compliance, to bring your EBEWE status up to date.']))
-            
-        # Add the compliance information for the current property
-        # Set the font size and set the x,y coordinates to add a gap between the dates table and the text
+        # Add in the note for the tolled compliance due dates if running for the reissued dates
+        if reissued_check:
+            pdf.set_xy(10, pdf.y + 2)
+            pdf.write(txt = ''.join(['* Change in dates due to the 2020-2022 tolled EBEWE deadlines.']))
+
+
+        # Set a variable to hold the date of compliance based on reissued due dates
+        if reissued_check:
+            if reissued_date == 'September 7, 2023':
+                due_date = 'Sept 7'
+            elif reissued_date == 'October 7, 2023':
+                due_date = 'Oct 7'
+            else:
+                due_date = 'Dec 1'
+        else:
+            due_date = 'Dec 1'
+
         pdf.set_font('helvetica', '', 12)
         pdf.set_xy(10, pdf.y + 15)
-        pdf.write(txt = f"{about_data['prop_address']} has the Los Angeles Building ID: {about_data['prop_la_id']}. \n\n" + 
-                  f"- The compliance due date is Dec 1, {comp_periods[about_data['prop_la_id'][-1]] + 1}.\n\n" +
+        pdf.write(txt = f"{about_data['prop_address']} has the Los Angeles Building ID: {about_data['prop_la_id']}. \n\n" 
+                  f"- The compliance due date is {due_date}, {comp_periods[about_data['prop_la_id'][-1]] + 1}.\n\n" 
                   f"- The above benchmarking metrics can be used for the following EBEWE Phase II Exemptions\n"
-                  f"  (if the reductions or score is met during the applicable EBEWE Phase II 5 year comparative\n"
-                  f"  period.):\n\n"
-                  f"    - Available energy exemptions include a 15% reduction in Weather Normalized Source EUI\n"
-                  f"      and an Energy Star® Score of 75 or higher. \n\n" + 
+                  f"    - A 15% reduction in Weather Normalized Source EUI or an Energy Star® Score of 75 or higher\n"
+                  f"      can satisfy an energy . \n\n" 
                   f"    - A 20% reduction in Water Use Intensity can satisfy a water exemption.\n\n"
-                  f"- Weather Normalized Source EUI and Water Use Intensity values for Dec 31, {comp_periods[about_data['prop_la_id'][-1]]} " + 
-                    f"will be compared to the values from the following years: " + 
-                    f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][0] + 1}, " + 
-                    f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][1] + 1}, " + 
-                    f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][2] + 1} and " + 
-                    f"Dec 31, {[comp_periods[about_data['prop_la_id'][-1]] - x for x in range(2, 6)][3] + 1}. " + 
-                    f"The percent changes between the final year of the comparative period to the other years " + 
-                    f"will be used to determine if the above exemptions can be met.")
+                  f"- Current Weather Normalized Source EUI and Water Use Intensity values will be compared to the 5\n"
+                  f"  year period preceding the building's compliance due date to detmine if the above exemptions are\n"
+                  f"  met")
         
         # If the report was generated for the final year of the compliance period - generate exemption results
         if comp_periods[about_data['prop_la_id'][-1]] == int(year_ending):
@@ -771,20 +862,20 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             else:
                 es_message = f"- Did not achieve an Energy Star® Score of 75 or above."
             # Check if there was at least a 15% reduction in WNSEUI
-            # Check first if we have reassigned best_eui_change_value to NA if it was not available during the year ending
-            if best_eui_change_value == 'NA':
+            # Check first if we have reassigned best_eui_shift to NA if it was not available during the year ending
+            if best_eui_shift == 'NA':
                 eui_message = f"- Weather Normalized Source EUI not available to check reduction."
-            elif best_eui_change_value <= -15:
+            elif best_eui_shift <= -15:
                 eui_message = (f"- Satisfied the 15% Weather Normalized Source Energy Use Intensity Reduction.\n" + 
-                               f"- From {best_eui_change_year.split('/')[-1]} to {year_ending}: {best_eui_change_value}% reduction.")
+                               f"- From {best_eui_from} to {best_eui_to}: {best_eui_shift}% reduction.")
             else:
                 eui_message = f"- Did not satisfy the 15% reduction for Weather Normalized Source EUI."
             # Check if there was at least a 20% reduction in WUI
-            if best_wui_change_value == 'UNDEF':
+            if best_wui_shift == 'UNDEF':
                 wui_message = f"- Did not Satisfy the 20% reduction for Water Use Intensity."
-            elif best_wui_change_value <= -20:
+            elif best_wui_shift <= -20:
                 wui_message = ("- Satisfied the 20% Water Use Intensity Reduction.\n" + 
-                               f"- From {best_wui_change_year.split('/')[-1]} to {year_ending}: {best_wui_change_value}% reduction.")
+                               f"- From {best_wui_from} to {best_wui_to}: {best_wui_shift}% reduction.")
             else:
                 wui_message = f"- Did not Satisfy the 20% reduction for Water Use Intensity."
                 
