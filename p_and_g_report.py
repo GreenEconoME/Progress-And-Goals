@@ -6,6 +6,7 @@ from Utilities.pull_prop_data import pull_prop_data
 from Utilities.pull_water_consumption import pull_water_consumption
 from Utilities.pull_monthly_energy import pull_monthly_energy
 from Utilities.generate_pdf import generate_pdf
+from Utilities.pull_monthly_metrics import pull_monthly_metrics
 from Utilities.plot_metrics import (graph_eu, graph_hcf, graph_es_score, 
                             graph_seui, graph_e_meters_overlay, 
                             graph_g_meters_overlay)
@@ -58,6 +59,17 @@ st.caption('Select the month that will be used to pull the year ending metrics f
 # Grab the numberical value from the month dict for the month within the year ending
 month_ending = month_dict[month_select]
 
+# Add a checkbox that will allow to calculate the reissued dates for la buildings ending in 0, 1, 2, 3
+reissued_check = st.checkbox(label = 'Run P&G with reissued dates.', 
+                            value = False, 
+                            help = ' '.join(['This will alter the comparative period used for', 
+                                             'the EBEWE properties with LADBS IDs ending in 0, 1, 2 and 3.'])
+                            )
+if reissued_check:
+    reissued_date = st.selectbox('Select the reissued due date.', 
+                                options = ['September 7, 2023', 'October 7, 2023'])
+    st.caption('Select the reissued due date that you would like to be used to calculate the EBEWE reductions.')
+
 # Create a button to generate the report
 if st.button('Generate Progress and Goals Report'):
     with st.spinner('Generating Progress and Goals Report'):
@@ -76,11 +88,7 @@ if st.button('Generate Progress and Goals Report'):
             with st.spinner('Pulling annual metrics and monthly kBtu data.'):
                 # Pull the property data
                 (ann_metrics, 
-                monthly_kbtu, 
-                best_eui_change_year, 
-                best_eui_change_value, 
-                best_wui_change_year, 
-                best_wui_change_value) = pull_prop_data(prop_id, 
+                monthly_kbtu) = pull_prop_data(prop_id, 
                                                         year_ending, 
                                                         month_ending, 
                                                         domain, 
@@ -94,13 +102,15 @@ if st.button('Generate Progress and Goals Report'):
                 # Pull the energy dataframe
                 monthly_energy = pull_monthly_energy(prop_id, domain, auth)
 
+            with st.spinner('Pulling annual metrics.'):
+                # Pull the annual metrics and add them to the energy and water dfs
+                monthly_energy, water_df = pull_monthly_metrics(monthly_energy, water_df, domain, auth, prop_id)
+
             with st.spinner('Generating Progress and Goals PDF.'):
                 # Generate the progress and goals report
                 p_and_g_report = generate_pdf(about_data, ann_metrics, prop_id, 
-                                                year_ending, best_eui_change_year, 
-                                                best_eui_change_value, best_wui_change_year, 
-                                                best_wui_change_value, monthly_kbtu, water_df, 
-                                                monthly_energy)
+                                              year_ending, monthly_kbtu, water_df, 
+                                              monthly_energy, reissued_check, reissued_date)
 
             # Add a button to download the Progress and Goals report
             st.download_button(
@@ -110,7 +120,6 @@ if st.button('Generate Progress and Goals Report'):
                 mime="application/pdf"
             )
             st.caption(f"Click to download the Progress and Goals report for {about_data['prop_address']}")
-
             # Display the plotly graphs on the streamlit app
             st.write(graph_eu(monthly_kbtu, about_data['prop_address']))
             st.write(graph_hcf(water_df, about_data['prop_address']))
