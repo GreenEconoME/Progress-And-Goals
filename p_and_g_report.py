@@ -69,6 +69,8 @@ if reissued_check:
     reissued_date = st.selectbox('Select the reissued due date.', 
                                 options = ['September 7, 2023', 'October 7, 2023'])
     st.caption('Select the reissued due date that you would like to be used to calculate the EBEWE reductions.')
+else:
+    reissued_date = None
 
 # Create a button to generate the report
 if st.button('Generate Progress and Goals Report'):
