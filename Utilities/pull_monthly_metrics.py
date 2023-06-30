@@ -10,7 +10,12 @@ import streamlit as st
 @st.cache
 def pull_monthly_metrics(energy_entries, water_entries, domain, auth, prop_id):
     # Create a list of the end date entries
-    for entry_date in set(list(water_entries['End Date']) + list(energy_entries['End Date'])):
+    if water_entries is not None:
+        all_entries = set(list(water_entries['End Date']) + list(energy_entries['End Date']))
+    else:
+        all_entries = set(list(energy_entries['End Date']))
+
+    for entry_date in all_entries:
         # Save the year and month of the month (date)
         year = entry_date.year
         month = entry_date.month
