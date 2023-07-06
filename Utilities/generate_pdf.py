@@ -376,21 +376,29 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         if reissued_check:
             ## Need to create different masks for 0,1 and 2,3 (shifted one month)
             if reissued_date == 'September 7, 2023':
-                start_mask = (monthly_energy['End Date'] >= f'10-31-{year_ending}')
-                end_mask = (monthly_energy['End Date'] <= f'8-31-{year_ending + 1}')
+                energy_start_mask = (monthly_energy['End Date'] >= f'10-31-{year_ending}')
+                energy_end_mask = (monthly_energy['End Date'] <= f'8-31-{year_ending + 1}')
+                water_start_mask = (monthly_energy['End Date'] >= f'10-31-{year_ending}')
+                water_end_mask = (monthly_energy['End Date'] <= f'8-31-{year_ending + 1}')
             elif reissued_date == 'October 7, 2023':
-                start_mask = (monthly_energy['End Date'] >= f'11-30-{year_ending}')
-                end_mask = (monthly_energy['End Date'] <= f'9-30-{year_ending + 1}')
+                energy_start_mask = (monthly_energy['End Date'] >= f'11-30-{year_ending}')
+                energy_end_mask = (monthly_energy['End Date'] <= f'9-30-{year_ending + 1}')
+                water_start_mask = (monthly_energy['End Date'] >= f'11-30-{year_ending}')
+                water_end_mask = (monthly_energy['End Date'] <= f'9-30-{year_ending + 1}')
             # If the ladbs id doesn't end in 0,1,2, or 3, then the comparative period remains the same
             else:
-                start_mask = (monthly_energy['End Date'] >= f'12-31-{year_ending}')
-                end_mask = (monthly_energy['End Date'] <= f'11-30-{year_ending + 1}')
+                energy_start_mask = (monthly_energy['End Date'] >= f'12-31-{year_ending}')
+                energy_end_mask = (monthly_energy['End Date'] <= f'11-30-{year_ending + 1}')
+                water_start_mask = (monthly_energy['End Date'] >= f'12-31-{year_ending}')
+                water_end_mask = (monthly_energy['End Date'] <= f'11-30-{year_ending + 1}')
         else:
-            start_mask = (monthly_energy['End Date'] >= f'12-31-{year_ending}')
-            end_mask = (monthly_energy['End Date'] <= f'11-30-{year_ending + 1}')
+            energy_start_mask = (monthly_energy['End Date'] >= f'12-31-{year_ending}')
+            energy_end_mask = (monthly_energy['End Date'] <= f'11-30-{year_ending + 1}')
+            water_start_mask = (monthly_energy['End Date'] >= f'12-31-{year_ending}')
+            water_end_mask = (monthly_energy['End Date'] <= f'11-30-{year_ending + 1}')
 
         # Create a temp_df that holds the months that will be used to compare to the months in the comparative period
-        temp_df = monthly_energy.loc[start_mask & end_mask]
+        temp_df = monthly_energy.loc[energy_start_mask & energy_end_mask]
         temp_df.reset_index(drop = True, inplace = True)
 
         # Create a list to hold the eui info for each month/year for the baseline periods
@@ -429,7 +437,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         
         # Filter the monthly water dataframe down to the years that will be used to compare to the compliance period
         # i.e. the last month of the comparative period and the next 11 months
-        temp_df = water_df.loc[(water_df['End Date'] >= f'12-31-{year_ending}') & (water_df['End Date'] <= f'11-30-{year_ending + 1}')]
+        temp_df = water_df.loc[water_start_mask & water_end_mask]
         temp_df.reset_index(drop = True, inplace = True)
 
         # Create a list to hold the wui info for each month/year for the baseline periods
