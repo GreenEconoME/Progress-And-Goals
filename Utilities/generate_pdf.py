@@ -835,7 +835,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                   f"- The compliance due date is {due_date}, {comp_periods[about_data['prop_la_id'][-1]] + 1}.\n\n" 
                   f"- The above benchmarking metrics can be used for the following EBEWE Phase II Exemptions\n"
                   f"    - A 15% reduction in Weather Normalized Source EUI or an Energy Star® Score of 75 or higher\n"
-                  f"      can satisfy an energy . \n\n" 
+                  f"      can satisfy an energy exemption. \n\n" 
                   f"    - A 20% reduction in Water Use Intensity can satisfy a water exemption.\n\n"
                   f"- Current Weather Normalized Source EUI and Water Use Intensity values will be compared to the 5\n"
                   f"  year period preceding the building's compliance due date to detmine if the above exemptions are\n"
