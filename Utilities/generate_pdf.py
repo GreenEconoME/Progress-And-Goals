@@ -773,16 +773,12 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         if reissued_check:
             if reissued_date == 'September 7, 2023':
                 comp_due_date = 'Sept 7, 2023*'
-                comp_period_message = 'Data must not be older than 9/7/2018*'
             else:
                 comp_due_date = 'Oct 7, 2023*'
-                comp_period_message = 'Data must not be older than 10/7/2018*'
             # Change the complince due date
             ebewe_dates.at[1, 1] = comp_due_date
             ebewe_dates.at[2, 1] = comp_due_date
-            # Change the comparative period earliest data date
-            ebewe_dates.at[1, 3] = comp_period_message
-            ebewe_dates.at[2, 3] = comp_period_message
+
 
         # Save the column width to distribute the columns evenly across the page
         col_width = pdf.epw / len(ebewe_dates.columns)
