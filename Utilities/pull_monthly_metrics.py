@@ -7,7 +7,6 @@ import streamlit as st
 
 
 # Define a function to pull the annual metrics for each month for energy and water
-@st.cache
 def pull_monthly_metrics(energy_entries, water_entries, domain, auth, prop_id):
     # Create a list of the end date entries
     if water_entries is not None:
