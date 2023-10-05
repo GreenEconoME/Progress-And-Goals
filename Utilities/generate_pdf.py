@@ -846,13 +846,24 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             # pdf.set_fill_color(93, 189, 119)
             pdf.cell(w = 0, 
                      h = 12,
-                     txt = '**EBEWE Phase II Exemption Status**', 
+                     txt = '**Current EBEWE Phase II Exemption Status***', 
                      new_x = 'LEFT',
                      new_y = 'NEXT',
                      align = 'C', 
                     #  border = 1,
                      markdown = True,
                      fill = True)
+            
+            # Add the message for the EBEWE Exemption status section
+            # pdf.ln(pdf.font_size * 2)
+            pdf.set_font('helvetica', '', 8)
+            pdf.multi_cell(w = 0,
+                        txt = ''.join(["*These options represent the current Phase II Exemption Eligibility ",
+                                    "at the time of the running of this report. ", 
+                                    "LADBS requires the most current data to determine Exemption Eligibility. ",
+                                    "Due to this, Reduction Exemptions metrics will need to be re-run after September ",
+                                    "1st of the current reporting year."]), 
+                        align = 'C')
             
             ## Create the text for the exemption messages determined by either satisfying the exemption or not
             # Check if there is an es score available
