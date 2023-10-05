@@ -861,7 +861,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                         txt = ''.join(["*These options represent the current Phase II Exemption Eligibility ",
                                     "at the time of the running of this report. ", 
                                     "LADBS requires the most current data to determine Exemption Eligibility. ",
-                                    "Due to this, Reduction Exemptions metrics will need to be re-run after September ",
+                                    "Due to this, Reduction Exemption metrics will need to be re-run after September ",
                                     "1st of the current reporting year."]), 
                         align = 'C')
             
