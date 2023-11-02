@@ -48,11 +48,11 @@ def pull_monthly_metrics(energy_entries, water_entries, domain, auth, prop_id):
             energy_entries.loc[energy_entries['End Date'] == entry_date, 'National Median Source EUI (kBtu/ft²)'] = national_median_source_eui if isinstance(national_median_source_eui, str) else np.nan
             
             # Format the datatype of the energy metric columns
-            energy_entries['Energy Star Score'] = pd.to_numeric(energy_entries['Energy Star Score'])
-            energy_entries['Weather Normalized Source EU (kBtu)'] = pd.to_numeric(energy_entries['Weather Normalized Source EU (kBtu)'])
-            energy_entries['National Median Source Energy Use (kBtu)'] = pd.to_numeric(energy_entries['National Median Source Energy Use (kBtu)'])
-            energy_entries['Weather Normalized Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_entries['Weather Normalized Source EUI (kBtu/ft²)'])
-            energy_entries['National Median Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_entries['National Median Source EUI (kBtu/ft²)'])
+            energy_entries['Energy Star Score'] = pd.to_numeric(energy_entries['Energy Star Score'], errors='coerce')
+            energy_entries['Weather Normalized Source EU (kBtu)'] = pd.to_numeric(energy_entries['Weather Normalized Source EU (kBtu)'], errors='coerce')
+            energy_entries['National Median Source Energy Use (kBtu)'] = pd.to_numeric(energy_entries['National Median Source Energy Use (kBtu)'], errors='coerce')
+            energy_entries['Weather Normalized Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_entries['Weather Normalized Source EUI (kBtu/ft²)'], errors='coerce')
+            energy_entries['National Median Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_entries['National Median Source EUI (kBtu/ft²)'], errors='coerce')
 
         # Will pull data based on if the current month is in only water, only energy or in both to reduce redundant api calls
         # Check if the month is only in the water_entries df
