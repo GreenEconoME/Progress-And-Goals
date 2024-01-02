@@ -35,7 +35,6 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             self.cell(0, 
                      10, 
                      ' | '.join(['GREENECONOME.COM', 
-                                '2665 30th Street #209, Santa Monica, CA 90405', 
                                 '424-422-9696', 
                                 'info@greeneconome.com', 
                                 'CA Contractors License B and C-10 #1001368']),
@@ -745,224 +744,224 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  align = 'C')
 
 
-    ### Add the EBEWE Compliance page
-    # Check if the building has an LADBS Building ID for EBEWE - if it does, generate the page for EBEWE info
-    if about_data['prop_la_id'] != 'None':
-        pdf.add_page()
+    # ### Add the EBEWE Compliance page
+    # # Check if the building has an LADBS Building ID for EBEWE - if it does, generate the page for EBEWE info
+    # if about_data['prop_la_id'] != 'None':
+    #     pdf.add_page()
 
-        # Add the title for the EBEWE Compliance dates table
-        pdf.set_font('helvetica', '', 20)
-        # Old green coloring for headers
-        # pdf.set_fill_color(93, 189, 119)
-        pdf.cell(w = 0, 
-                 h = 12,
-                 txt = '**EBEWE Compliance Dates**', 
-                 new_x = 'LEFT',
-                 new_y = 'NEXT',
-                 align = 'C', 
-                 border = 1,
-                 markdown = True,
-                 fill = True)
+    #     # Add the title for the EBEWE Compliance dates table
+    #     pdf.set_font('helvetica', '', 20)
+    #     # Old green coloring for headers
+    #     # pdf.set_fill_color(93, 189, 119)
+    #     pdf.cell(w = 0, 
+    #              h = 12,
+    #              txt = '**EBEWE Compliance Dates**', 
+    #              new_x = 'LEFT',
+    #              new_y = 'NEXT',
+    #              align = 'C', 
+    #              border = 1,
+    #              markdown = True,
+    #              fill = True)
 
-        # Set the font size for the compliance dates table
-        pdf.set_font('helvetica', '', 10)
+    #     # Set the font size for the compliance dates table
+    #     pdf.set_font('helvetica', '', 10)
 
-        # Read in the EBEWE Dates excel file
-        ebewe_dates = pd.read_excel('Resources/EBEWE Dates.xlsx', header = None)
-        # If using the reissed dates, alter the cells for the compliance due dates of the 0/1, 2/3 buildings
-        if reissued_check:
-            if reissued_date == 'September 7, 2023':
-                comp_due_date = 'Sept 7, 2023*'
-            else:
-                comp_due_date = 'Oct 7, 2023*'
-            # Change the complince due date
-            ebewe_dates.at[1, 1] = comp_due_date
-            ebewe_dates.at[2, 1] = comp_due_date
-
-
-        # Save the column width to distribute the columns evenly across the page
-        col_width = pdf.epw / len(ebewe_dates.columns)
-        # Iterate through the rows and columns of the table to create a cell for each value in the table
-        for row_index, row in ebewe_dates.iterrows():
-            for column_index, value in row.items():
-                # Set the fill colors for the rows to alternate shades of green
-                if row_index % 2 == 0:
-                    # Old coloring
-                    # pdf.set_fill_color(93, 149, 119)
-                    pdf.set_fill_color(237, 237, 237)
-                else:
-                    # Old coloring
-                    # pdf.set_fill_color(93, 129, 119)
-                    pdf.set_fill_color(255, 255, 255)
-                # Make a cell to hold the table value
-                pdf.multi_cell(w = col_width, 
-                               h = line_height, 
-                               txt = value, 
-                               align = 'C',
-                               fill = True, 
-                               border = 1, 
-                               new_x="RIGHT", 
-                               new_y="TOP",
-                               max_line_height=pdf.font_size)
-            # After each row, create a line break to start the next row beneath
-            pdf.ln(line_height)
+    #     # Read in the EBEWE Dates excel file
+    #     ebewe_dates = pd.read_excel('Resources/EBEWE Dates.xlsx', header = None)
+    #     # If using the reissed dates, alter the cells for the compliance due dates of the 0/1, 2/3 buildings
+    #     if reissued_check:
+    #         if reissued_date == 'September 7, 2023':
+    #             comp_due_date = 'Sept 7, 2023*'
+    #         else:
+    #             comp_due_date = 'Oct 7, 2023*'
+    #         # Change the complince due date
+    #         ebewe_dates.at[1, 1] = comp_due_date
+    #         ebewe_dates.at[2, 1] = comp_due_date
 
 
-        # Add in the note for the tolled compliance due dates if running for the reissued dates
-        if reissued_check:
-            pdf.set_xy(10, pdf.y + 2)
-            pdf.write(txt = ''.join(['* Change in dates due to the 2020-2022 tolled EBEWE deadlines.']))
+    #     # Save the column width to distribute the columns evenly across the page
+    #     col_width = pdf.epw / len(ebewe_dates.columns)
+    #     # Iterate through the rows and columns of the table to create a cell for each value in the table
+    #     for row_index, row in ebewe_dates.iterrows():
+    #         for column_index, value in row.items():
+    #             # Set the fill colors for the rows to alternate shades of green
+    #             if row_index % 2 == 0:
+    #                 # Old coloring
+    #                 # pdf.set_fill_color(93, 149, 119)
+    #                 pdf.set_fill_color(237, 237, 237)
+    #             else:
+    #                 # Old coloring
+    #                 # pdf.set_fill_color(93, 129, 119)
+    #                 pdf.set_fill_color(255, 255, 255)
+    #             # Make a cell to hold the table value
+    #             pdf.multi_cell(w = col_width, 
+    #                            h = line_height, 
+    #                            txt = value, 
+    #                            align = 'C',
+    #                            fill = True, 
+    #                            border = 1, 
+    #                            new_x="RIGHT", 
+    #                            new_y="TOP",
+    #                            max_line_height=pdf.font_size)
+    #         # After each row, create a line break to start the next row beneath
+    #         pdf.ln(line_height)
 
 
-        # Set a variable to hold the date of compliance based on reissued due dates
-        if reissued_check:
-            if reissued_date == 'September 7, 2023':
-                due_date = 'Sept 7'
-            elif reissued_date == 'October 7, 2023':
-                due_date = 'Oct 7'
-            else:
-                due_date = 'Dec 1'
-        else:
-            due_date = 'Dec 1'
+    #     # Add in the note for the tolled compliance due dates if running for the reissued dates
+    #     if reissued_check:
+    #         pdf.set_xy(10, pdf.y + 2)
+    #         pdf.write(txt = ''.join(['* Change in dates due to the 2020-2022 tolled EBEWE deadlines.']))
 
-        pdf.set_font('helvetica', '', 12)
-        pdf.set_xy(10, pdf.y + 15)
-        pdf.write(txt = f"{about_data['prop_address']} has the Los Angeles Building ID: {about_data['prop_la_id']}. \n\n" 
-                  f"- The compliance due date is {due_date}, {comp_periods[about_data['prop_la_id'][-1]] + 1}.\n\n" 
-                  f"- The above benchmarking metrics can be used for the following EBEWE Phase II Exemptions\n"
-                  f"    - A 15% reduction in Weather Normalized Source EUI or an Energy Star® Score of 75 or higher\n"
-                  f"      can satisfy an energy exemption. \n\n" 
-                  f"    - A 20% reduction in Water Use Intensity can satisfy a water exemption.\n\n"
-                  f"- Current Weather Normalized Source EUI and Water Use Intensity values will be compared to the 5\n"
-                  f"  year period preceding the building's compliance due date to detmine if the above exemptions are\n"
-                  f"  met")
+
+    #     # Set a variable to hold the date of compliance based on reissued due dates
+    #     if reissued_check:
+    #         if reissued_date == 'September 7, 2023':
+    #             due_date = 'Sept 7'
+    #         elif reissued_date == 'October 7, 2023':
+    #             due_date = 'Oct 7'
+    #         else:
+    #             due_date = 'Dec 1'
+    #     else:
+    #         due_date = 'Dec 1'
+
+    #     pdf.set_font('helvetica', '', 12)
+    #     pdf.set_xy(10, pdf.y + 15)
+    #     pdf.write(txt = f"{about_data['prop_address']} has the Los Angeles Building ID: {about_data['prop_la_id']}. \n\n" 
+    #               f"- The compliance due date is {due_date}, {comp_periods[about_data['prop_la_id'][-1]] + 1}.\n\n" 
+    #               f"- The above benchmarking metrics can be used for the following EBEWE Phase II Exemptions\n"
+    #               f"    - A 15% reduction in Weather Normalized Source EUI or an Energy Star® Score of 75 or higher\n"
+    #               f"      can satisfy an energy exemption. \n\n" 
+    #               f"    - A 20% reduction in Water Use Intensity can satisfy a water exemption.\n\n"
+    #               f"- Current Weather Normalized Source EUI and Water Use Intensity values will be compared to the 5\n"
+    #               f"  year period preceding the building's compliance due date to detmine if the above exemptions are\n"
+    #               f"  met")
         
-        # If the report was generated for the final year of the compliance period - generate exemption results
-        if comp_periods[about_data['prop_la_id'][-1]] == int(year_ending):
-            # Add the title for the EBEWE Exemption status section
-            pdf.ln(pdf.font_size * 2)
-            pdf.set_font('helvetica', '', 20)
-            # Old green coloring for headers
-            # pdf.set_fill_color(93, 189, 119)
-            pdf.cell(w = 0, 
-                     h = 12,
-                     txt = '**Current EBEWE Phase II Exemption Status***', 
-                     new_x = 'LEFT',
-                     new_y = 'NEXT',
-                     align = 'C', 
-                    #  border = 1,
-                     markdown = True,
-                     fill = True)
+    #     # If the report was generated for the final year of the compliance period - generate exemption results
+    #     if comp_periods[about_data['prop_la_id'][-1]] == int(year_ending):
+    #         # Add the title for the EBEWE Exemption status section
+    #         pdf.ln(pdf.font_size * 2)
+    #         pdf.set_font('helvetica', '', 20)
+    #         # Old green coloring for headers
+    #         # pdf.set_fill_color(93, 189, 119)
+    #         pdf.cell(w = 0, 
+    #                  h = 12,
+    #                  txt = '**Current EBEWE Phase II Exemption Status***', 
+    #                  new_x = 'LEFT',
+    #                  new_y = 'NEXT',
+    #                  align = 'C', 
+    #                 #  border = 1,
+    #                  markdown = True,
+    #                  fill = True)
             
-            # Add the message for the EBEWE Exemption status section
-            # pdf.ln(pdf.font_size * 2)
-            pdf.set_font('helvetica', '', 8)
-            pdf.multi_cell(w = 0,
-                        txt = ''.join(["*These options represent the current Phase II Exemption Eligibility ",
-                                    "at the time of the running of this report. ", 
-                                    "LADBS requires the most current data to determine Exemption Eligibility. ",
-                                    "Due to this, Reduction Exemption metrics will need to be re-run after September ",
-                                    "1st of the current reporting year."]), 
-                        align = 'C')
+    #         # Add the message for the EBEWE Exemption status section
+    #         # pdf.ln(pdf.font_size * 2)
+    #         pdf.set_font('helvetica', '', 8)
+    #         pdf.multi_cell(w = 0,
+    #                     txt = ''.join(["*These options represent the current Phase II Exemption Eligibility ",
+    #                                 "at the time of the running of this report. ", 
+    #                                 "LADBS requires the most current data to determine Exemption Eligibility. ",
+    #                                 "Due to this, Reduction Exemption metrics will need to be re-run after September ",
+    #                                 "1st of the current reporting year."]), 
+    #                     align = 'C')
             
-            ## Create the text for the exemption messages determined by either satisfying the exemption or not
-            # Check if there is an es score available
-            if ann_metrics.loc[0, 'Energy Star Score'] == 'N/A':
-                es_message = f"- Energy Star® Score not calculated for {ann_metrics['Year Ending'].dt.date[0]}"
-            # Check for an ES score of 75 or higher
-            elif float(ann_metrics.loc[0, 'Energy Star Score']) >= 75:
-                es_message = (f"- Achieved an Energy Star® Score of {ann_metrics.loc[0, 'Energy Star Score']}.\n" + 
-                              f"- Apply for Energy Star® Certification to receive an energy exemption.")
+    #         ## Create the text for the exemption messages determined by either satisfying the exemption or not
+    #         # Check if there is an es score available
+    #         if ann_metrics.loc[0, 'Energy Star Score'] == 'N/A':
+    #             es_message = f"- Energy Star® Score not calculated for {ann_metrics['Year Ending'].dt.date[0]}"
+    #         # Check for an ES score of 75 or higher
+    #         elif float(ann_metrics.loc[0, 'Energy Star Score']) >= 75:
+    #             es_message = (f"- Achieved an Energy Star® Score of {ann_metrics.loc[0, 'Energy Star Score']}.\n" + 
+    #                           f"- Apply for Energy Star® Certification to receive an energy exemption.")
                               
-            else:
-                es_message = f"- Did not achieve an Energy Star® Score of 75 or above."
-            # Check if there was at least a 15% reduction in WNSEUI
-            # Check first if we have reassigned best_eui_shift to NA if it was not available during the year ending
-            if best_eui_shift == 'NA':
-                eui_message = f"- Weather Normalized Source EUI not available to check reduction."
-            elif best_eui_shift <= -15:
-                eui_message = (f"- Satisfied the 15% Weather Normalized Source Energy Use Intensity Reduction.\n" + 
-                               f"- From {best_eui_from} to {best_eui_to}: {best_eui_shift}% reduction.")
-            else:
-                eui_message = f"- Did not satisfy the 15% reduction for Weather Normalized Source EUI."
-            # Check if there was at least a 20% reduction in WUI
-            if best_wui_shift == 'UNDEF':
-                wui_message = f"- Did not Satisfy the 20% reduction for Water Use Intensity."
-            elif best_wui_shift <= -20:
-                wui_message = ("- Satisfied the 20% Water Use Intensity Reduction.\n" + 
-                               f"- From {best_wui_from} to {best_wui_to}: {best_wui_shift}% reduction.")
-            else:
-                wui_message = f"- Did not Satisfy the 20% reduction for Water Use Intensity."
+    #         else:
+    #             es_message = f"- Did not achieve an Energy Star® Score of 75 or above."
+    #         # Check if there was at least a 15% reduction in WNSEUI
+    #         # Check first if we have reassigned best_eui_shift to NA if it was not available during the year ending
+    #         if best_eui_shift == 'NA':
+    #             eui_message = f"- Weather Normalized Source EUI not available to check reduction."
+    #         elif best_eui_shift <= -15:
+    #             eui_message = (f"- Satisfied the 15% Weather Normalized Source Energy Use Intensity Reduction.\n" + 
+    #                            f"- From {best_eui_from} to {best_eui_to}: {best_eui_shift}% reduction.")
+    #         else:
+    #             eui_message = f"- Did not satisfy the 15% reduction for Weather Normalized Source EUI."
+    #         # Check if there was at least a 20% reduction in WUI
+    #         if best_wui_shift == 'UNDEF':
+    #             wui_message = f"- Did not Satisfy the 20% reduction for Water Use Intensity."
+    #         elif best_wui_shift <= -20:
+    #             wui_message = ("- Satisfied the 20% Water Use Intensity Reduction.\n" + 
+    #                            f"- From {best_wui_from} to {best_wui_to}: {best_wui_shift}% reduction.")
+    #         else:
+    #             wui_message = f"- Did not Satisfy the 20% reduction for Water Use Intensity."
                 
-            ### Add the results for ES score WNEUI/WUI reductions
-            ## Add the ES Score row
-            pdf.ln(pdf.font_size * 1.2)
-            pdf.set_font('helvetica', '', 16)
-            # ES Score Title block
-            pdf.multi_cell(w = pdf.epw / 3, 
-                           h = None,
-                           txt = '**Energy Star® Score**', 
-                           new_x = 'RIGHT', 
-                           new_y = 'TOP', 
-                           align = 'C', 
-                           border = 0, 
-                           markdown = True)
-            # ES Score Result block
-            pdf.set_font('helvetica', '', 15)
-            pdf.multi_cell(w = pdf.epw * 2 / 3, 
-                           h = None,
-                           txt = es_message, 
-                           new_x = 'LEFT', 
-                           new_y = 'NEXT', 
-                           align = 'L', 
-                           border = 0, 
-                           markdown = True)
+    #         ### Add the results for ES score WNEUI/WUI reductions
+    #         ## Add the ES Score row
+    #         pdf.ln(pdf.font_size * 1.2)
+    #         pdf.set_font('helvetica', '', 16)
+    #         # ES Score Title block
+    #         pdf.multi_cell(w = pdf.epw / 3, 
+    #                        h = None,
+    #                        txt = '**Energy Star® Score**', 
+    #                        new_x = 'RIGHT', 
+    #                        new_y = 'TOP', 
+    #                        align = 'C', 
+    #                        border = 0, 
+    #                        markdown = True)
+    #         # ES Score Result block
+    #         pdf.set_font('helvetica', '', 15)
+    #         pdf.multi_cell(w = pdf.epw * 2 / 3, 
+    #                        h = None,
+    #                        txt = es_message, 
+    #                        new_x = 'LEFT', 
+    #                        new_y = 'NEXT', 
+    #                        align = 'L', 
+    #                        border = 0, 
+    #                        markdown = True)
             
-            ## Add the WNSEUI Reduction row
-            pdf.ln(pdf.font_size * 1.2)
-            pdf.set_font('helvetica', '', 16)
-            # WNSEUI Title block
-            pdf.multi_cell(w = pdf.epw / 3, 
-                           h = None,
-                           txt = '**Weather Normalized Source EUI Reduction**', 
-                           new_x = 'RIGHT', 
-                           new_y = 'TOP', 
-                           align = 'C', 
-                           border = 0, 
-                           markdown = True)
-            # WNSEUI Result block
-            pdf.set_font('helvetica', '', 15)
-            pdf.multi_cell(w = pdf.epw * 2 / 3, 
-                           h = None,
-                           txt = eui_message, 
-                           new_x = 'LEFT', 
-                           new_y = 'NEXT', 
-                           align = 'L', 
-                           border = 0, 
-                           markdown = True)
+    #         ## Add the WNSEUI Reduction row
+    #         pdf.ln(pdf.font_size * 1.2)
+    #         pdf.set_font('helvetica', '', 16)
+    #         # WNSEUI Title block
+    #         pdf.multi_cell(w = pdf.epw / 3, 
+    #                        h = None,
+    #                        txt = '**Weather Normalized Source EUI Reduction**', 
+    #                        new_x = 'RIGHT', 
+    #                        new_y = 'TOP', 
+    #                        align = 'C', 
+    #                        border = 0, 
+    #                        markdown = True)
+    #         # WNSEUI Result block
+    #         pdf.set_font('helvetica', '', 15)
+    #         pdf.multi_cell(w = pdf.epw * 2 / 3, 
+    #                        h = None,
+    #                        txt = eui_message, 
+    #                        new_x = 'LEFT', 
+    #                        new_y = 'NEXT', 
+    #                        align = 'L', 
+    #                        border = 0, 
+    #                        markdown = True)
             
-            ## Add the WUI Reduction row
-            pdf.ln(pdf.font_size * 1.2)
-            pdf.set_font('helvetica', '', 16)
-            # WUI Title block
-            pdf.multi_cell(w = pdf.epw / 3, 
-                           h = None,
-                           txt = '**Water Use Intensity Reduction**', 
-                           new_x = 'RIGHT', 
-                           new_y = 'TOP', 
-                           align = 'C', 
-                           border = 0, 
-                           markdown = True)
-            # WUI Result block
-            pdf.set_font('helvetica', '', 15)
-            pdf.multi_cell(w = pdf.epw * 2 / 3, 
-                           h = None,
-                           txt = wui_message, 
-                           new_x = 'LEFT', 
-                           new_y = 'NEXT', 
-                           align = 'L', 
-                           border = 0, 
-                           markdown = True)
+    #         ## Add the WUI Reduction row
+    #         pdf.ln(pdf.font_size * 1.2)
+    #         pdf.set_font('helvetica', '', 16)
+    #         # WUI Title block
+    #         pdf.multi_cell(w = pdf.epw / 3, 
+    #                        h = None,
+    #                        txt = '**Water Use Intensity Reduction**', 
+    #                        new_x = 'RIGHT', 
+    #                        new_y = 'TOP', 
+    #                        align = 'C', 
+    #                        border = 0, 
+    #                        markdown = True)
+    #         # WUI Result block
+    #         pdf.set_font('helvetica', '', 15)
+    #         pdf.multi_cell(w = pdf.epw * 2 / 3, 
+    #                        h = None,
+    #                        txt = wui_message, 
+    #                        new_x = 'LEFT', 
+    #                        new_y = 'NEXT', 
+    #                        align = 'L', 
+    #                        border = 0, 
+    #                        markdown = True)
 
     # Return the Progress and Goals PDF
     return bytes(pdf.output())
