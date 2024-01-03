@@ -744,85 +744,85 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  align = 'C')
 
 
-    # ### Add the EBEWE Compliance page
-    # # Check if the building has an LADBS Building ID for EBEWE - if it does, generate the page for EBEWE info
-    # if about_data['prop_la_id'] != 'None':
-    #     pdf.add_page()
+    ### Add the EBEWE Compliance page
+    # Check if the building has an LADBS Building ID for EBEWE - if it does, generate the page for EBEWE info
+    if about_data['prop_la_id'] != 'None':
+        pdf.add_page()
 
-    #     # Add the title for the EBEWE Compliance dates table
-    #     pdf.set_font('helvetica', '', 20)
-    #     # Old green coloring for headers
-    #     # pdf.set_fill_color(93, 189, 119)
-    #     pdf.cell(w = 0, 
-    #              h = 12,
-    #              txt = '**EBEWE Compliance Dates**', 
-    #              new_x = 'LEFT',
-    #              new_y = 'NEXT',
-    #              align = 'C', 
-    #              border = 1,
-    #              markdown = True,
-    #              fill = True)
+        # Add the title for the EBEWE Compliance dates table
+        pdf.set_font('helvetica', '', 20)
+        # Old green coloring for headers
+        # pdf.set_fill_color(93, 189, 119)
+        pdf.cell(w = 0, 
+                 h = 12,
+                 txt = '**EBEWE Compliance Dates**', 
+                 new_x = 'LEFT',
+                 new_y = 'NEXT',
+                 align = 'C', 
+                 border = 1,
+                 markdown = True,
+                 fill = True)
 
-    #     # Set the font size for the compliance dates table
-    #     pdf.set_font('helvetica', '', 10)
+        # Set the font size for the compliance dates table
+        pdf.set_font('helvetica', '', 10)
 
-    #     # Read in the EBEWE Dates excel file
-    #     ebewe_dates = pd.read_excel('Resources/EBEWE Dates.xlsx', header = None)
-    #     # If using the reissed dates, alter the cells for the compliance due dates of the 0/1, 2/3 buildings
-    #     if reissued_check:
-    #         if reissued_date == 'September 7, 2023':
-    #             comp_due_date = 'Sept 7, 2023*'
-    #         else:
-    #             comp_due_date = 'Oct 7, 2023*'
-    #         # Change the complince due date
-    #         ebewe_dates.at[1, 1] = comp_due_date
-    #         ebewe_dates.at[2, 1] = comp_due_date
-
-
-    #     # Save the column width to distribute the columns evenly across the page
-    #     col_width = pdf.epw / len(ebewe_dates.columns)
-    #     # Iterate through the rows and columns of the table to create a cell for each value in the table
-    #     for row_index, row in ebewe_dates.iterrows():
-    #         for column_index, value in row.items():
-    #             # Set the fill colors for the rows to alternate shades of green
-    #             if row_index % 2 == 0:
-    #                 # Old coloring
-    #                 # pdf.set_fill_color(93, 149, 119)
-    #                 pdf.set_fill_color(237, 237, 237)
-    #             else:
-    #                 # Old coloring
-    #                 # pdf.set_fill_color(93, 129, 119)
-    #                 pdf.set_fill_color(255, 255, 255)
-    #             # Make a cell to hold the table value
-    #             pdf.multi_cell(w = col_width, 
-    #                            h = line_height, 
-    #                            txt = value, 
-    #                            align = 'C',
-    #                            fill = True, 
-    #                            border = 1, 
-    #                            new_x="RIGHT", 
-    #                            new_y="TOP",
-    #                            max_line_height=pdf.font_size)
-    #         # After each row, create a line break to start the next row beneath
-    #         pdf.ln(line_height)
+        # Read in the EBEWE Dates excel file
+        ebewe_dates = pd.read_excel('Resources/EBEWE Dates.xlsx', header = None)
+        # If using the reissed dates, alter the cells for the compliance due dates of the 0/1, 2/3 buildings
+        if reissued_check:
+            if reissued_date == 'September 7, 2023':
+                comp_due_date = 'Sept 7, 2023*'
+            else:
+                comp_due_date = 'Oct 7, 2023*'
+            # Change the complince due date
+            ebewe_dates.at[1, 1] = comp_due_date
+            ebewe_dates.at[2, 1] = comp_due_date
 
 
-    #     # Add in the note for the tolled compliance due dates if running for the reissued dates
-    #     if reissued_check:
-    #         pdf.set_xy(10, pdf.y + 2)
-    #         pdf.write(txt = ''.join(['* Change in dates due to the 2020-2022 tolled EBEWE deadlines.']))
+        # Save the column width to distribute the columns evenly across the page
+        col_width = pdf.epw / len(ebewe_dates.columns)
+        # Iterate through the rows and columns of the table to create a cell for each value in the table
+        for row_index, row in ebewe_dates.iterrows():
+            for column_index, value in row.items():
+                # Set the fill colors for the rows to alternate shades of green
+                if row_index % 2 == 0:
+                    # Old coloring
+                    # pdf.set_fill_color(93, 149, 119)
+                    pdf.set_fill_color(237, 237, 237)
+                else:
+                    # Old coloring
+                    # pdf.set_fill_color(93, 129, 119)
+                    pdf.set_fill_color(255, 255, 255)
+                # Make a cell to hold the table value
+                pdf.multi_cell(w = col_width, 
+                               h = line_height, 
+                               txt = value, 
+                               align = 'C',
+                               fill = True, 
+                               border = 1, 
+                               new_x="RIGHT", 
+                               new_y="TOP",
+                               max_line_height=pdf.font_size)
+            # After each row, create a line break to start the next row beneath
+            pdf.ln(line_height)
 
 
-    #     # Set a variable to hold the date of compliance based on reissued due dates
-    #     if reissued_check:
-    #         if reissued_date == 'September 7, 2023':
-    #             due_date = 'Sept 7'
-    #         elif reissued_date == 'October 7, 2023':
-    #             due_date = 'Oct 7'
-    #         else:
-    #             due_date = 'Dec 1'
-    #     else:
-    #         due_date = 'Dec 1'
+        # Add in the note for the tolled compliance due dates if running for the reissued dates
+        if reissued_check:
+            pdf.set_xy(10, pdf.y + 2)
+            pdf.write(txt = ''.join(['* Change in dates due to the 2020-2022 tolled EBEWE deadlines.']))
+
+
+        # # Set a variable to hold the date of compliance based on reissued due dates
+        # if reissued_check:
+        #     if reissued_date == 'September 7, 2023':
+        #         due_date = 'Sept 7'
+        #     elif reissued_date == 'October 7, 2023':
+        #         due_date = 'Oct 7'
+        #     else:
+        #         due_date = 'Dec 1'
+        # else:
+        #     due_date = 'Dec 1'
 
     #     pdf.set_font('helvetica', '', 12)
     #     pdf.set_xy(10, pdf.y + 15)
