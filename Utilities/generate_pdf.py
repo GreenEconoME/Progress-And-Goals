@@ -806,11 +806,15 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             # After each row, create a line break to start the next row beneath
             pdf.ln(line_height)
 
-
-        # Add in the note for the tolled compliance due dates if running for the reissued dates
-        if reissued_check:
-            pdf.set_xy(10, pdf.y + 2)
-            pdf.write(txt = ''.join(['* Change in dates due to the 2020-2022 tolled EBEWE deadlines.']))
+        # Add in the note for historical benchmarking
+        pdf.set_xy(10, pdf.y + 2)
+        pdf.write(txt = ''.join(['* Green Econome can provide historic benchmarking and Phase II reporting, ', 
+                                'to bring any past due EBEWE compliance up to date. ']))
+  
+        # # Add in the note for the tolled compliance due dates if running for the reissued dates
+        # if reissued_check:
+        #     pdf.set_xy(10, pdf.y + 2)
+        #     pdf.write(txt = ''.join(['* Change in dates due to the 2020-2022 tolled EBEWE deadlines.']))
 
 
         # # Set a variable to hold the date of compliance based on reissued due dates
