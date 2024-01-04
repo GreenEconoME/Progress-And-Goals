@@ -66,9 +66,9 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
         # Check to see if each metric is populated (a string) and then save it to the dictionary
         # If the metric is not populated - assign it to np.nan
         if type(year_ending_dict['propertyMetrics']['metric'][0]['value']) == str:
-            year_data['Energy Star Score'] = year_ending_dict['propertyMetrics']['metric'][0]['value']
+            year_data['ENERGY STAR Score'] = year_ending_dict['propertyMetrics']['metric'][0]['value']
         else:
-            year_data['Energy Star Score'] = 'N/A'
+            year_data['ENERGY STAR Score'] = 'N/A'
 
         if type(year_ending_dict['propertyMetrics']['metric'][1]['value']) == str:
             year_data[f"Weather Normalized Source Energy Use {units_of_metrics[0]}"] = year_ending_dict['propertyMetrics']['metric'][1]['value']

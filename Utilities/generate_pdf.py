@@ -104,7 +104,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     # Insert the Energy Star Score for the selected year ending date
     pdf.cell(w = es_score_w,  
              h = es_score_h,  
-             txt = f"**{ann_metrics.loc[0, 'Energy Star Score']}**", 
+             txt = f"**{ann_metrics.loc[0, 'ENERGY STAR Score']}**", 
              markdown = True,
              border = 0, 
              align = 'C')
@@ -157,7 +157,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     # pdf.set_xy(10 , es_score_h + logo_h + 20)
     pdf.set_xy(10 , bottom_of_es_cell + es_score_h)
     pdf.cell(w = es_score_w, 
-             txt = 'Energy Star® Score', 
+             txt = 'ENERGY STAR® Score', 
              border = 0, 
              align = 'C')
 
@@ -660,7 +660,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     pdf.set_font('helvetica', '', 30)
     pdf.cell(w = 0, 
              h = 12,
-             txt = 'Source EUI and Energy Star® Score', 
+             txt = 'Source EUI and ENERGY STAR® Score', 
              new_x = 'LEFT',
              new_y = 'NEXT',
              align = 'C', 
@@ -832,7 +832,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         # ES Score Title block
         pdf.multi_cell(w = pdf.epw / 3, 
                        h = None,
-                       txt = '**Energy Star® Score**', 
+                       txt = '**ENERGY STAR® Score**', 
                        new_x = 'RIGHT', 
                        new_y = 'TOP', 
                        align = 'C', 
@@ -842,7 +842,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         pdf.set_font('helvetica', '', 15)
         pdf.multi_cell(w = pdf.epw * 2 / 3, 
                        h = None,
-                       txt = '- An Energy Star® Score of 75 or higher can grant an Energy Exemption.', 
+                       txt = 'An ENERGY STAR Score of 75 or higher can grant an Energy Exemption.', 
                        new_x = 'LEFT', 
                        new_y = 'NEXT', 
                        align = 'L', 
