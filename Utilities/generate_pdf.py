@@ -810,6 +810,90 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         pdf.set_xy(10, pdf.y + 2)
         pdf.write(txt = ''.join(['* Green Econome can provide historic benchmarking and Phase II reporting, ', 
                                 'to bring any past due EBEWE compliance up to date. ']))
+        
+        # Add the title for the most common EBEWE Exemptions
+        pdf.ln(pdf.font_size * 2)
+        pdf.set_font('helvetica', '', 20)
+        # Old green coloring for headers
+        # pdf.set_fill_color(93, 189, 119)
+        pdf.cell(w = 0, 
+                 h = 12,
+                 txt = '**Most Common EBEWE Phase II Exemptions**', 
+                 new_x = 'LEFT',
+                 new_y = 'NEXT',
+                 align = 'C', 
+                #  border = 1,
+                 markdown = True,
+                 fill = True)
+        
+        # Add the ES Score row
+        pdf.ln(pdf.font_size * 1.2)
+        pdf.set_font('helvetica', '', 16)
+        # ES Score Title block
+        pdf.multi_cell(w = pdf.epw / 3, 
+                       h = None,
+                       txt = '**Energy Star® Score**', 
+                       new_x = 'RIGHT', 
+                       new_y = 'TOP', 
+                       align = 'C', 
+                       border = 0, 
+                       markdown = True)
+        # ES Score Result block
+        pdf.set_font('helvetica', '', 15)
+        pdf.multi_cell(w = pdf.epw * 2 / 3, 
+                       h = None,
+                       txt = '- An Energy Star® Score of 75 or higher can grant an Energy Exemption.', 
+                       new_x = 'LEFT', 
+                       new_y = 'NEXT', 
+                       align = 'L', 
+                       border = 0, 
+                       markdown = True)
+        
+        ## Add the WNSEUI Reduction row
+        pdf.ln(pdf.font_size * 1.2)
+        pdf.set_font('helvetica', '', 16)
+        # WNSEUI Title block
+        pdf.multi_cell(w = pdf.epw / 3, 
+                       h = None,
+                       txt = '**Weather Normalized Source EUI Reduction**', 
+                       new_x = 'RIGHT', 
+                       new_y = 'TOP', 
+                       align = 'C', 
+                       border = 0, 
+                       markdown = True)
+        # WNSEUI Result block
+        pdf.set_font('helvetica', '', 15)
+        pdf.multi_cell(w = pdf.epw * 2 / 3, 
+                       h = None,
+                       txt = '- A 15% reduction in Weather Normalized Source EUI can grant an Energy Exemption.', 
+                       new_x = 'LEFT', 
+                       new_y = 'NEXT', 
+                       align = 'L', 
+                       border = 0, 
+                       markdown = True)
+        
+        ## Add the WUI Reduction row
+        pdf.ln(pdf.font_size * 1.2)
+        pdf.set_font('helvetica', '', 16)
+        # WUI Title block
+        pdf.multi_cell(w = pdf.epw / 3, 
+                       h = None,
+                       txt = '**Water Use Intensity Reduction**', 
+                       new_x = 'RIGHT', 
+                       new_y = 'TOP', 
+                       align = 'C', 
+                       border = 0, 
+                       markdown = True)
+        # WUI Result block
+        pdf.set_font('helvetica', '', 15)
+        pdf.multi_cell(w = pdf.epw * 2 / 3, 
+                       h = None,
+                       txt = '- A 20% reduction in Water Use Intensity can grant a water exemption.', 
+                       new_x = 'LEFT', 
+                       new_y = 'NEXT', 
+                       align = 'L', 
+                       border = 0, 
+                       markdown = True)
   
         # # Add in the note for the tolled compliance due dates if running for the reissued dates
         # if reissued_check:
