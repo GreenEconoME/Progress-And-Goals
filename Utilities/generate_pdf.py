@@ -835,7 +835,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                        txt = '**ENERGY STAR® Score**', 
                        new_x = 'RIGHT', 
                        new_y = 'TOP', 
-                       align = 'C', 
+                       align = 'L', 
                        border = 0, 
                        markdown = True)
         # ES Score Result block
@@ -858,14 +858,14 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                        txt = '**Weather Normalized Source EUI Reduction**', 
                        new_x = 'RIGHT', 
                        new_y = 'TOP', 
-                       align = 'C', 
+                       align = 'L', 
                        border = 0, 
                        markdown = True)
         # WNSEUI Result block
         pdf.set_font('helvetica', '', 15)
         pdf.multi_cell(w = pdf.epw * 2 / 3, 
                        h = None,
-                       txt = '- A 15% reduction in Weather Normalized Source EUI can grant an Energy Exemption.', 
+                       txt = 'A 15% reduction in Weather Normalized Source EUI can grant an Energy Exemption.', 
                        new_x = 'LEFT', 
                        new_y = 'NEXT', 
                        align = 'L', 
@@ -881,14 +881,14 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                        txt = '**Water Use Intensity Reduction**', 
                        new_x = 'RIGHT', 
                        new_y = 'TOP', 
-                       align = 'C', 
+                       align = 'L', 
                        border = 0, 
                        markdown = True)
         # WUI Result block
         pdf.set_font('helvetica', '', 15)
         pdf.multi_cell(w = pdf.epw * 2 / 3, 
                        h = None,
-                       txt = '- A 20% reduction in Water Use Intensity can grant a water exemption.', 
+                       txt = 'A 20% reduction in Water Use Intensity can grant a water exemption.', 
                        new_x = 'LEFT', 
                        new_y = 'NEXT', 
                        align = 'L', 
