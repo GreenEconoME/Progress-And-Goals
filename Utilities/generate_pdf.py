@@ -1,5 +1,6 @@
 # Import dependencies
 from fpdf import FPDF
+from fpdf.fonts import FontFace
 import numpy as np
 import copy
 import io
@@ -779,32 +780,52 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             ebewe_dates.at[2, 1] = comp_due_date
 
 
-        # Save the column width to distribute the columns evenly across the page
-        col_width = pdf.epw / len(ebewe_dates.columns)
-        # Iterate through the rows and columns of the table to create a cell for each value in the table
-        for row_index, row in ebewe_dates.iterrows():
-            for column_index, value in row.items():
-                # Set the fill colors for the rows to alternate shades of green
-                if row_index % 2 == 0:
-                    # Old coloring
-                    # pdf.set_fill_color(93, 149, 119)
-                    pdf.set_fill_color(237, 237, 237)
-                else:
-                    # Old coloring
-                    # pdf.set_fill_color(93, 129, 119)
-                    pdf.set_fill_color(255, 255, 255)
-                # Make a cell to hold the table value
-                pdf.multi_cell(w = col_width, 
-                               h = line_height, 
-                               txt = value, 
-                               align = 'C',
-                               fill = True, 
-                               border = 1, 
-                               new_x="RIGHT", 
-                               new_y="TOP",
-                               max_line_height=pdf.font_size)
-            # After each row, create a line break to start the next row beneath
-            pdf.ln(line_height)
+        # # Save the column width to distribute the columns evenly across the page
+        # col_width = pdf.epw / len(ebewe_dates.columns)
+        # # Iterate through the rows and columns of the table to create a cell for each value in the table
+        # for row_index, row in ebewe_dates.iterrows():
+        #     for column_index, value in row.items():
+        #         # Set the fill colors for the rows to alternate shades of green
+        #         if row_index % 2 == 0:
+        #             # Old coloring
+        #             # pdf.set_fill_color(93, 149, 119)
+        #             pdf.set_fill_color(237, 237, 237)
+        #         else:
+        #             # Old coloring
+        #             # pdf.set_fill_color(93, 129, 119)
+        #             pdf.set_fill_color(255, 255, 255)
+
+        #         # Make a cell to hold the table value
+        #         pdf.multi_cell(w = col_width, 
+        #                        h = line_height, 
+        #                        txt = value, 
+        #                        align = 'C',
+        #                        fill = True, 
+        #                        border = 1, 
+        #                        new_x="RIGHT", 
+        #                        new_y="TOP",
+        #                        max_line_height=pdf.font_size)
+
+        #     # After each row, create a line break to start the next row beneath
+        #     pdf.ln(line_height)
+
+        # Calculate column widths based on table size
+        col_widths = [pdf.epw / len(ebewe_dates.columns)] * len(ebewe_dates.columns)
+
+        
+        # Start the table with cell padding for spacing
+        with pdf.table(col_widths = col_widths, text_align = 'CENTER') as table:
+            # Iterate through table rows and cells
+            for row_index, row in ebewe_dates.iterrows():
+                current_row = table.row()
+                for column_index, value in row.items():
+
+                    # Set alternating row fill colors
+                    if row_index % 2 == 0:
+                        style = FontFace(fill_color = (237, 237, 237))  # Lighter gray
+                    else:
+                        style = FontFace(fill_color = (255, 255, 255))  # White
+                    current_row.cell(value, style = style)  # Center vertically
 
         # Add in the note for historical benchmarking
         pdf.set_xy(10, pdf.y + 2)
