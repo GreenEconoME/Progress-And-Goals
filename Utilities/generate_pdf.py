@@ -339,7 +339,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  new_x = 'LMARGIN',
                  new_y = 'NEXT',
                  fill = True,
-                 txt = '**Best Reductions at End of Reporting Year**', 
+                 txt = '**Best Energy And Water Shifts**', 
                  markdown = True)
 
         # Add column title - WN SEUI
