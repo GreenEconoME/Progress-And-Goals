@@ -30,9 +30,26 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  monthly_energy, reissued_check, reissued_date = None):
 
     class PDF(FPDF):
+
+        def __init__(self, **kwargs):
+            super(PDF, self).__init__(**kwargs)
+            # Adding custom google Roboto fonts
+            self.add_font('Roboto', 
+                          '', 
+                          'fonts/Roboto-Regular.ttf', 
+                          uni = True)
+            self.add_font('Roboto', 
+                          'B', 
+                          'fonts/Roboto-Bold.ttf', 
+                          uni = True)
+            self.add_font('Roboto', 
+                          'I', 
+                          'fonts/Roboto-Italic.ttf', 
+                          uni = True)
+
         def footer(self):
             self.set_y(-15)
-            self.set_font("helvetica", "I", 7)
+            self.set_font("Roboto", "I", 7)
             self.cell(0, 
                      10, 
                      ' | '.join(['GREENECONOME.COM', 
@@ -47,7 +64,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     pdf.set_author('Kyle Gee')
     pdf.set_title('Progress and Goals Report')
     pdf.add_page()
-    pdf.set_font('helvetica', 'B', 20)
+    pdf.set_font('Roboto', 'B', 20)
 
     # Set the background for the top progress and goals section
     start_x = pdf.x
@@ -85,7 +102,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     # Add cell to place an empty gap between Progress and Goals Report and the About Info
     pdf.set_xy(pdf.x, pdf.y)
-    pdf.set_font('helvetica', '', 18)
+    pdf.set_font('Roboto', '', 18)
     pdf.multi_cell(w = 0, 
              h = None,
              txt = f"**{about_data['prop_name']}**\n",
@@ -98,7 +115,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     # Add the Energy Star Score Cell 
     # Set the coordinates to be under the logo
     pdf.set_xy(x = 10, y = pdf.y + 2)
-    pdf.set_font('helvetica', '', 65)
+    pdf.set_font('Roboto', '', 65)
     # Set variables for the energy star score height and width
     es_score_w = 40
     es_score_h = 20
@@ -112,7 +129,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     bottom_of_es_cell = pdf.y + 2
 
     # Add the address and the property use data (Middle Column)
-    pdf.set_font('helvetica', '', 12)
+    pdf.set_font('Roboto', '', 12)
     pdf.multi_cell(w = (pdf.epw - es_score_w) / 2, 
                    h = None,
                    txt = f"**Primary Property Type:** {about_data['prop_function']}\n" + 
@@ -131,7 +148,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     prop_type_y = pdf.y
 
     # Add the address and the IDs (Right Column)
-    pdf.set_font('helvetica', '', 12)
+    pdf.set_font('Roboto', '', 12)
     id_line = []
     if about_data['prop_la_id'] != 'None':
         id_line.append(f"**LA Building ID:** {about_data['prop_la_id']}")
@@ -184,7 +201,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     # Write the title for the benchmarking analytics
     pdf.set_xy(x = 10, y = max([prop_type_y, prop_add_y]) + 10)
-    pdf.set_font('helvetica', '', 20)
+    pdf.set_font('Roboto', '', 20)
     pdf.cell(w = 0, 
              h = 12,
              txt = '**Benchmarking Analytics**', 
@@ -224,7 +241,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     plot_metrics_df.replace(np.nan, 'N/A', inplace = True)
 
     # Set the font for the Benchmarking Analytics table
-    pdf.set_font('helvetica', '', 5)
+    pdf.set_font('Roboto', '', 5)
 
     # Set a line height to create determine the distance for a new line between each row of data
     line_height = pdf.font_size * 7
@@ -259,14 +276,14 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             if column_index == 'index':
                 alignment = 'L'
                 bolden = '**'
-                pdf.set_font('helvetica', '', 10)
+                pdf.set_font('Roboto', '', 10)
                 col_width = pdf.epw / (len(plot_metrics_df.columns) - 1)
 
             # If the current column is not the index, center and increase the size of the value with a smaller cell width
             else:
                 alignment = 'C'
                 bolden = ''
-                pdf.set_font('helvetica', '', 11)
+                pdf.set_font('Roboto', '', 11)
                 col_width = (pdf.epw - pdf.epw / (len(plot_metrics_df.columns) - 1)) / (len(plot_metrics_df.columns) - 1)
 
             # If the value is Energy Star Score, replace it with Energy Star® Score
@@ -329,7 +346,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         ## Add the EBEWE reduction metrics
 
         # Add the best reductions table's title
-        pdf.set_font('helvetica', '', 17)
+        pdf.set_font('Roboto', '', 17)
         # Old green coloring for headers
         # pdf.set_fill_color(93, 189, 119)
         pdf.set_y(pdf.y + 3)
@@ -347,7 +364,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         # Old coloring
         # pdf.set_fill_color(93, 149, 119)
         pdf.set_fill_color(237, 237, 237)
-        pdf.set_font('helvetica', '', 14)
+        pdf.set_font('Roboto', '', 14)
         pdf.cell(w = pdf.epw / 2, 
                  h = 6, 
                  border = 1,
@@ -479,7 +496,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         # Add a check if there was no best_eui_change_year and value
         # This occurs when there is no WNSEUI for the year generated
         pdf.set_fill_color(255, 255, 255)
-        pdf.set_font('helvetica', '', 11)
+        pdf.set_font('Roboto', '', 11)
         pdf.cell(w = pdf.epw / 2, 
                  h = 6, 
                  border = 1,
@@ -535,7 +552,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                 wui_shift = str(wui_shift) + '% shift'
 
         # Add the Recent energy and water shifts table's title
-        pdf.set_font('helvetica', '', 17)
+        pdf.set_font('Roboto', '', 17)
         # Old green coloring for headers
         # pdf.set_fill_color(93, 189, 119)
         pdf.set_y(pdf.y + 3)
@@ -553,7 +570,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         # Old coloring
         # pdf.set_fill_color(93, 149, 119)
         pdf.set_fill_color(237, 237, 237)
-        pdf.set_font('helvetica', '', 14)
+        pdf.set_font('Roboto', '', 14)
         pdf.cell(w = pdf.epw / 2, 
                  h = 6, 
                  border = 1,
@@ -583,7 +600,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         # Old Coloring
         # pdf.set_fill_color(93, 129, 119)
         pdf.set_fill_color(255, 255, 255)
-        pdf.set_font('helvetica', '', 11)
+        pdf.set_font('Roboto', '', 11)
         pdf.cell(w = pdf.epw / 2, 
                  h = 6, 
                  border = 1,
@@ -610,7 +627,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     pdf.add_page()
 
     # Add title for the Energy and Water Consumption plots page
-    pdf.set_font('helvetica', '', 30)
+    pdf.set_font('Roboto', '', 30)
     # Old green coloring for headers
     # pdf.set_fill_color(93, 189, 119)
     pdf.cell(w = 0, 
@@ -646,7 +663,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                   h = (pdf.eph / 2) * 0.9)
     # If there is no water consumption graph, write that there is no water meter
     else:
-        pdf.set_font('helvetica', '', 20)
+        pdf.set_font('Roboto', '', 20)
         pdf.cell(w = 0, 
                  h = None,
                  txt = 'This Property does not have a water meter.', 
@@ -658,7 +675,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     pdf.add_page()
 
     # Add title for the Source EUI and Energy Star Score page
-    pdf.set_font('helvetica', '', 30)
+    pdf.set_font('Roboto', '', 30)
     pdf.cell(w = 0, 
              h = 12,
              txt = 'Source EUI and ENERGY STAR® Score', 
@@ -687,7 +704,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                   h = (pdf.eph / 2) * 0.9)
     # If there are no historical ES scores, write that the property does not qualify for an ES score
     else:
-        pdf.set_font('helvetica', '', 20)
+        pdf.set_font('Roboto', '', 20)
         pdf.cell(w = 0, 
                  h = None,
                  txt = 'This Property does not qualify for an Energy Star® Score.', 
@@ -698,7 +715,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     pdf.add_page()
 
     # Add title for the Source EUI and Energy Star Score page
-    pdf.set_font('helvetica', '', 30)
+    pdf.set_font('Roboto', '', 30)
     pdf.cell(w = 0, 
              h = 12,
              txt = 'Monthly Electric and Gas Consumption', 
@@ -719,7 +736,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                   h = (pdf.eph / 2) * 0.9)
     # If there is no plot, write that the property does not have an electric meter
     else:
-        pdf.set_font('helvetica', '', 20)
+        pdf.set_font('Roboto', '', 20)
         pdf.cell(w = 0, 
                  h = None,
                  txt = 'This Property does not contain an electric meter.', 
@@ -737,7 +754,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                   h = (pdf.eph / 2) * 0.9)
     # If there is no plot, write that the property does not contain a gas meter
     else:
-        pdf.set_font('helvetica', '', 20)
+        pdf.set_font('Roboto', '', 20)
         pdf.cell(w = 0, 
                  h = None,
                  txt = 'This Property does not contain a gas meter.', 
@@ -751,7 +768,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         pdf.add_page()
 
         # Add the title for the EBEWE Compliance dates table
-        pdf.set_font('helvetica', '', 20)
+        pdf.set_font('Roboto', '', 20)
         # Old green coloring for headers
         # pdf.set_fill_color(93, 189, 119)
         pdf.cell(w = 0, 
@@ -765,7 +782,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                  fill = True)
 
         # Set the font size for the compliance dates table
-        pdf.set_font('helvetica', '', 10)
+        pdf.set_font('Roboto', '', 10)
 
         # Read in the EBEWE Dates excel file
         ebewe_dates = pd.read_excel('Resources/EBEWE Dates.xlsx', header = None)
@@ -829,12 +846,12 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
         # Add in the note for historical benchmarking
         pdf.set_xy(10, pdf.y + 2)
-        pdf.write(txt = ''.join(['* Green Econome can provide historic benchmarking and Phase II reporting, ', 
-                                'to bring any past due EBEWE compliance up to date. ']))
+        pdf.write(txt = ''.join(['* Green Econome can provide historic benchmarking and Phase II reporting ', 
+                                'to bring any past-due EBEWE compliance up to date. ']))
         
         # Add the title for the most common EBEWE Exemptions
         pdf.ln(pdf.font_size * 2)
-        pdf.set_font('helvetica', '', 20)
+        pdf.set_font('Roboto', '', 20)
         # Old green coloring for headers
         # pdf.set_fill_color(93, 189, 119)
         pdf.cell(w = 0, 
@@ -849,7 +866,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         
         # Add the ES Score row
         pdf.ln(pdf.font_size * 1.2)
-        pdf.set_font('helvetica', '', 16)
+        pdf.set_font('Roboto', '', 16)
         # ES Score Title block
         pdf.multi_cell(w = pdf.epw / 3, 
                        h = None,
@@ -860,7 +877,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                        border = 0, 
                        markdown = True)
         # ES Score Result block
-        pdf.set_font('helvetica', '', 15)
+        pdf.set_font('Roboto', '', 15)
         pdf.multi_cell(w = pdf.epw * 2 / 3, 
                        h = None,
                        txt = 'An ENERGY STAR Score of 75 or higher can grant an Energy Exemption.', 
@@ -872,7 +889,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         
         ## Add the WNSEUI Reduction row
         pdf.ln(pdf.font_size * 1.2)
-        pdf.set_font('helvetica', '', 16)
+        pdf.set_font('Roboto', '', 16)
         # WNSEUI Title block
         pdf.multi_cell(w = pdf.epw / 3, 
                        h = None,
@@ -883,7 +900,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                        border = 0, 
                        markdown = True)
         # WNSEUI Result block
-        pdf.set_font('helvetica', '', 15)
+        pdf.set_font('Roboto', '', 15)
         pdf.multi_cell(w = pdf.epw * 2 / 3, 
                        h = None,
                        txt = 'A 15% reduction in Weather Normalized Source EUI can grant an Energy Exemption.', 
@@ -895,7 +912,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         
         ## Add the WUI Reduction row
         pdf.ln(pdf.font_size * 1.2)
-        pdf.set_font('helvetica', '', 16)
+        pdf.set_font('Roboto', '', 16)
         # WUI Title block
         pdf.multi_cell(w = pdf.epw / 3, 
                        h = None,
@@ -906,7 +923,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                        border = 0, 
                        markdown = True)
         # WUI Result block
-        pdf.set_font('helvetica', '', 15)
+        pdf.set_font('Roboto', '', 15)
         pdf.multi_cell(w = pdf.epw * 2 / 3, 
                        h = None,
                        txt = 'A 20% reduction in Water Use Intensity can grant a water exemption.', 
@@ -933,7 +950,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         # else:
         #     due_date = 'Dec 1'
 
-    #     pdf.set_font('helvetica', '', 12)
+    #     pdf.set_font('Roboto', '', 12)
     #     pdf.set_xy(10, pdf.y + 15)
     #     pdf.write(txt = f"{about_data['prop_address']} has the Los Angeles Building ID: {about_data['prop_la_id']}. \n\n" 
     #               f"- The compliance due date is {due_date}, {comp_periods[about_data['prop_la_id'][-1]] + 1}.\n\n" 
@@ -949,7 +966,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     #     if comp_periods[about_data['prop_la_id'][-1]] == int(year_ending):
     #         # Add the title for the EBEWE Exemption status section
     #         pdf.ln(pdf.font_size * 2)
-    #         pdf.set_font('helvetica', '', 20)
+    #         pdf.set_font('Roboto', '', 20)
     #         # Old green coloring for headers
     #         # pdf.set_fill_color(93, 189, 119)
     #         pdf.cell(w = 0, 
@@ -964,7 +981,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             
     #         # Add the message for the EBEWE Exemption status section
     #         # pdf.ln(pdf.font_size * 2)
-    #         pdf.set_font('helvetica', '', 8)
+    #         pdf.set_font('Roboto', '', 8)
     #         pdf.multi_cell(w = 0,
     #                     txt = ''.join(["*These options represent the current Phase II Exemption Eligibility ",
     #                                 "at the time of the running of this report. ", 
@@ -1005,7 +1022,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     #         ### Add the results for ES score WNEUI/WUI reductions
     #         ## Add the ES Score row
     #         pdf.ln(pdf.font_size * 1.2)
-    #         pdf.set_font('helvetica', '', 16)
+    #         pdf.set_font('Roboto', '', 16)
     #         # ES Score Title block
     #         pdf.multi_cell(w = pdf.epw / 3, 
     #                        h = None,
@@ -1016,7 +1033,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     #                        border = 0, 
     #                        markdown = True)
     #         # ES Score Result block
-    #         pdf.set_font('helvetica', '', 15)
+    #         pdf.set_font('Roboto', '', 15)
     #         pdf.multi_cell(w = pdf.epw * 2 / 3, 
     #                        h = None,
     #                        txt = es_message, 
@@ -1028,7 +1045,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             
     #         ## Add the WNSEUI Reduction row
     #         pdf.ln(pdf.font_size * 1.2)
-    #         pdf.set_font('helvetica', '', 16)
+    #         pdf.set_font('Roboto', '', 16)
     #         # WNSEUI Title block
     #         pdf.multi_cell(w = pdf.epw / 3, 
     #                        h = None,
@@ -1039,7 +1056,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     #                        border = 0, 
     #                        markdown = True)
     #         # WNSEUI Result block
-    #         pdf.set_font('helvetica', '', 15)
+    #         pdf.set_font('Roboto', '', 15)
     #         pdf.multi_cell(w = pdf.epw * 2 / 3, 
     #                        h = None,
     #                        txt = eui_message, 
@@ -1051,7 +1068,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
             
     #         ## Add the WUI Reduction row
     #         pdf.ln(pdf.font_size * 1.2)
-    #         pdf.set_font('helvetica', '', 16)
+    #         pdf.set_font('Roboto', '', 16)
     #         # WUI Title block
     #         pdf.multi_cell(w = pdf.epw / 3, 
     #                        h = None,
@@ -1062,7 +1079,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
     #                        border = 0, 
     #                        markdown = True)
     #         # WUI Result block
-    #         pdf.set_font('helvetica', '', 15)
+    #         pdf.set_font('Roboto', '', 15)
     #         pdf.multi_cell(w = pdf.epw * 2 / 3, 
     #                        h = None,
     #                        txt = wui_message, 
