@@ -29,7 +29,8 @@ def graph_eu(kbtu_df, prop_name):
     kbtu_fig = go.Figure(data = data)
     
     kbtu_fig.update_layout(title = f'{prop_name}<br>MONTHLY ENERGY CONSUMPTION (kBtu)', 
-                           yaxis_title = 'Consumption (kBtu)', 
+                           yaxis_title = 'Consumption (kBtu)',
+                           font_family = 'Arial',
                            showlegend = True, 
                            legend=dict(orientation="h"))
     
@@ -69,6 +70,7 @@ def graph_hcf(water_df, prop_name):
             hcf_fig.update_layout(title = f'{prop_name}<br>MONTHLY WATER CONSUMPTION (HCF)', 
                                   yaxis_title = 'Consumption (HCF)', 
                                   yaxis_tickformat = '%{text:,}', 
+                                  font_family = 'Arial',
                                   legend=dict(orientation="h"))
             # Return the hcf fig
             return hcf_fig
@@ -93,8 +95,9 @@ def graph_hcf(water_df, prop_name):
 
             fig.update_layout(
                             hovermode = 'x unified', 
-                            title = 'Water Meter Monthly Consumption', 
-                            yaxis_title = 'Consumption (HCF)', 
+                            title = 'WATER METER MONTHLY CONSUMPTION', 
+                            yaxis_title = 'Consumption (HCF)',
+                            font_family = 'Arial', 
                             legend=dict(orientation="h"))
 
             # Check if anything was plotted, if so return the figure, if not return None
@@ -115,14 +118,14 @@ def graph_es_score(energy_df):
     if not energy_df['Energy Star Score'].isnull().all():
         es_trace = go.Scatter(x = energy_df.loc[11:, 'End Date'], 
                               y = energy_df['Energy Star Score'], 
-                              name = 'Energy Star® Score', 
+                              name = 'ENERGY STAR Score', 
                               mode = 'lines+markers',
                               marker_color = 'blue', 
                               hovertemplate = 'Date: %{x}<br>Energy Star Score: %{y}<extra></extra>')
 
         es_trace_2 = go.Scatter(x = energy_df['End Date'],
                                 y = [75] * len(energy_df['End Date']),
-                                name = 'Energy Star® Score Target',
+                                name = 'ENERGY STAR Score Target',
                                 line_dash = 'dash',
                                 mode = 'lines', 
                                 marker_color = 'green',
@@ -131,9 +134,10 @@ def graph_es_score(energy_df):
         data = [es_trace, es_trace_2]
         es_fig = go.Figure(data = data)
 
-        es_fig.update_layout(title = f'MONTHLY ENERGY STAR® SCORE', 
-                             yaxis_title = 'Energy Star® Score', 
+        es_fig.update_layout(title = f'MONTHLY ENERGY STAR SCORE', 
+                             yaxis_title = 'ENERGY STAR Score', 
                              showlegend = True, 
+                             font_family = 'Arial',
                              legend=dict(orientation="h"))
         return es_fig
 
@@ -166,6 +170,7 @@ def graph_seui(energy_df):
     # Add the title, axis title, add legend to bottom of plot
     seui_fig.update_layout(title = 'MONTHLY OVERALL ENERGY USAGE ON A SQ. FT. BASIS<br>MONTHLY ENERGY USE VS. NATIONAL MEDIAN COMPARISON (SOURCE EUI)', 
                            yaxis_title = 'Energy Use Intensity (kBtu/ft²)', 
+                           font_family = 'Arial',
                            legend=dict(orientation="h"))
     
     return seui_fig
@@ -195,6 +200,7 @@ def graph_e_meters_overlay(energy_df):
     fig.update_layout(hovermode = 'x unified', 
                       title = 'MONTHLY ELECTRIC METER CONSUMPTION (kWh)', 
                       yaxis_title = 'kWh Consumption', 
+                      font_family = 'Arial',
                       legend=dict(orientation="h"))
     
     # Check if anything was plotted, if so return the figure, if not return None
@@ -227,6 +233,7 @@ def graph_g_meters_overlay(energy_df):
     fig.update_layout(hovermode = 'x unified', 
                       title = 'MONTHLY GAS METER CONSUMPTION (Therms)', 
                       yaxis_title = 'Therm Consumption', 
+                      font_family = 'Arial',
                       legend=dict(orientation="h"))
     
     # Check if anything was plotted, if so return the figure, if not return None
