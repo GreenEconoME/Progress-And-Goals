@@ -435,7 +435,12 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
                 eui_data['Comparative Year'] = row['End Date'].year - i
                 eui_data['Comparative Month'] = row['End Date'].month
-                eui_data['Comparative WNSEUI'] = monthly_energy.loc[year_mask & month_mask, 'Weather Normalized Source EUI (kBtu/ft²)'].item()
+                # st.dataframe(monthly_energy.loc[year_mask & month_mask, 'Weather Normalized Source EUI (kBtu/ft²)'])
+                # print(monthly_energy.loc[year_mask & month_mask, 'Weather Normalized Source EUI (kBtu/ft²)'])
+                try:
+                    eui_data['Comparative WNSEUI'] = monthly_energy.loc[year_mask & month_mask, 'Weather Normalized Source EUI (kBtu/ft²)'].item()
+                except ValueError:
+                    eui_data['Comparative WNSEUI'] = np.nan
                 eui_values.append(eui_data)
 
 
@@ -474,7 +479,10 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
                 wui_data['Comparative Year'] = row['End Date'].year - i
                 wui_data['Comparative Month'] = row['End Date'].month
-                wui_data['Comparative WUI'] = water_df.loc[year_mask & month_mask, 'Water Use Intensity'].item()
+                try:
+                    wui_data['Comparative WUI'] = water_df.loc[year_mask & month_mask, 'Water Use Intensity'].item()
+                except ValueError:
+                    wui_data['Comparative WUI'] = np.nan
                 wui_values.append(wui_data)
 
 
