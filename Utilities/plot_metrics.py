@@ -116,7 +116,7 @@ def graph_hcf(water_df, prop_name):
 def graph_es_score(energy_df):
     # Check if there are non null ES Score values, if there are - plot the historical ES scores
     if not energy_df['Energy Star Score'].isnull().all():
-        es_trace = go.Scatter(x = energy_df.loc[11:, 'End Date'], 
+        es_trace = go.Scatter(x = energy_df['End Date'],
                               y = energy_df['Energy Star Score'], 
                               name = 'ENERGY STAR Score', 
                               mode = 'lines+markers',
