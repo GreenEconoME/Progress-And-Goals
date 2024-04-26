@@ -118,42 +118,48 @@ def pull_prop_data(espm_id, year_ending, month_ending, domain, auth):
         # Append the year_data dictionary to the annual_metrics list
         annual_metrics.append(year_data)
 
-        # Make a call to pull the historical monthly kBtu data for electric and gas
-        kbtu_data = []
-        for i in range(5):
-            # Pull the current years kbtu energy consumption
-            monthly_kbtu_data = requests.get(domain + f"/property/{espm_id}/metrics/monthly?year={year_ending-i}&month={month_ending}&measurementSystem=EPA", 
-                                             headers = {'PM-Metrics': 'siteElectricityUseMonthly, siteNaturalGasUseMonthly'}, 
-                                             auth = auth)
-            # Parse the kbtu call into a dictionary
-            kbtu_dict = xmltodict.parse(monthly_kbtu_data.content)
+    
+    electric_kbtu = []
+    gas_kbtu = []
 
-            # Loop through the response dictionary and add the monthly usage to the monthly kbtu dict
-            for i in range(len(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'])):
-                monthly_kbtu = {}
-                # Add the year, month, date as the End Date value
-                monthly_kbtu['End Date'] = pd.Timestamp(datetime(int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['@year']), 
-                                                                     int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['@month']), 
-                                                                     monthrange(int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['@year']), 
-                                                                                int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['@month']))[1]))
-
-                # Check if the consumption exists for that month and add it to the monthly kbtu dict
-                # If there is no electric or gas data for that month, fill the value with a nan
-                if type(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['value']) == str:
-                    monthly_kbtu['Electric kBtu'] = kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][i]['value']
+    for i in range(5):
+        # Pull the current years kbtu energy consumption
+        monthly_kbtu_data = requests.get(domain + f"/property/{espm_id}/metrics/monthly?year={year_ending - i}&month={12}&measurementSystem=EPA", 
+                                        headers = {'PM-Metrics': 'siteElectricityUseMonthly, siteNaturalGasUseMonthly'}, 
+                                        auth = auth)
+        # Parse the kbtu call into a dictionary
+        kbtu_dict = xmltodict.parse(monthly_kbtu_data.content)
+        
+        if 'monthlyMetric' in kbtu_dict['propertyMetrics']['metric'][0]:
+            for month in range(len(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'])):
+                e_kbtu = {}
+                e_kbtu['End Date'] = pd.Timestamp(datetime(int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][month]['@year']), 
+                                                                            int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][month]['@month']), 
+                                                                            monthrange(int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][month]['@year']), 
+                                                                                        int(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][month]['@month']))[1]))
+                if type(kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][month]['value']) == str:
+                    e_kbtu['Electric kBtu'] = kbtu_dict['propertyMetrics']['metric'][0]['monthlyMetric'][month]['value']
                 else:
-                    monthly_kbtu['Electric kBtu'] = np.nan
-
-                if type(kbtu_dict['propertyMetrics']['metric'][1]['monthlyMetric'][i]['value']) == str:
-                    monthly_kbtu['Gas kBtu'] = kbtu_dict['propertyMetrics']['metric'][1]['monthlyMetric'][i]['value']
+                    e_kbtu['Electric kBtu'] = np.nan
+                electric_kbtu.append(e_kbtu)
+            
+        if 'monthlyMetric' in kbtu_dict['propertyMetrics']['metric'][1]:
+            for month in range(len(kbtu_dict['propertyMetrics']['metric'][1]['monthlyMetric'])):
+                g_kbtu = {}
+                g_kbtu['End Date'] = pd.Timestamp(datetime(int(kbtu_dict['propertyMetrics']['metric'][1]['monthlyMetric'][month]['@year']), 
+                                                                            int(kbtu_dict['propertyMetrics']['metric'][1]['monthlyMetric'][month]['@month']), 
+                                                                            monthrange(int(kbtu_dict['propertyMetrics']['metric'][1]['monthlyMetric'][month]['@year']), 
+                                                                                        int(kbtu_dict['propertyMetrics']['metric'][1]['monthlyMetric'][month]['@month']))[1]))
+                if type(kbtu_dict['propertyMetrics']['metric'][1]['monthlyMetric'][month]['value']) == str:
+                    g_kbtu['Gas kBtu'] = kbtu_dict['propertyMetrics']['metric'][1]['monthlyMetric'][month]['value']
                 else:
-                    monthly_kbtu['Gas kBtu'] = np.nan
+                    g_kbtu['Gas kBtu'] = np.nan
+                gas_kbtu.append(g_kbtu)
+            
+    e_kbtu_df = pd.DataFrame(electric_kbtu)
+    g_kbtu_df = pd.DataFrame(gas_kbtu)
 
-                # Append the current years monthly kbtu values to the kbtu_data list
-                kbtu_data.append(monthly_kbtu)
-
-    # Create the kbtu dataframe
-    kbtu_df = pd.DataFrame(kbtu_data)
+    kbtu_df = pd.merge(e_kbtu_df, g_kbtu_df, on = 'End Date', how = 'outer')
 
     # Format the datatypes of the kBtu consumption columns
     kbtu_df['Electric kBtu'] = pd.to_numeric(kbtu_df['Electric kBtu'])
