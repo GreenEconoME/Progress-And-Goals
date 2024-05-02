@@ -534,7 +534,10 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         # If there is only one year of data, set the previous wnseui as the current
         except IndexError:
             previous_wnseui = latest_wnseui
-        wnseui_shift = round((latest_wnseui - previous_wnseui) / previous_wnseui * 100, 2)
+        try:    
+            wnseui_shift = round((latest_wnseui - previous_wnseui) / previous_wnseui * 100, 2)
+        except ZeroDivisionError:
+            wnseui_shift = np.nan
 
         # Using partial matching - may not have a water meter to pull the units used to create the column title
         latest_wui = float(ann_metrics.filter(like = 'Water Use Intensity').iloc[-1])
