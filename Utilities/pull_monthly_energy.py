@@ -47,19 +47,28 @@ def pull_monthly_energy(prop_id, domain, auth):
 
         # Create a dataframe from the energy meter consumption
         energy_data = []
+        # Create a variable to hold the key corresponding to the list of entries for delivery/consumption
+        if 'meterDelivery' in energy_consumption['meterData']:
+            consump_key = 'meterDelivery'
+            delivery_key = 'deliveryDate'
+            amount_key = 'quantity'
+        else:
+            consump_key = 'meterConsumption'
+            delivery_key = 'endDate'
+            amount_key = 'usage'
         # If there is a single entry for the meter, it will return a dictionary for the single entry
-        if isinstance(energy_consumption['meterData']['meterConsumption'], dict):
+        if isinstance(energy_consumption['meterData'][consump_key], dict):
             monthly_data = {}
-            monthly_data['End Date'] = energy_consumption['meterData']['meterConsumption']['endDate']
-            monthly_data[meter_descriptor] = energy_consumption['meterData']['meterConsumption']['usage']
+            monthly_data['End Date'] = energy_consumption['meterData'][consump_key][delivery_key]
+            monthly_data[meter_descriptor] = energy_consumption['meterData'][consump_key][amount_key]
 
             energy_data.append(monthly_data)
         else:
             # Iterate through the energy consumption call, and store the usage for each date into a dictionary to append the the energy_data list
-            for i in range(len(energy_consumption['meterData']['meterConsumption'])):
+            for i in range(len(energy_consumption['meterData'][consump_key])):
                 monthly_data = {}
-                monthly_data['End Date'] = energy_consumption['meterData']['meterConsumption'][i]['endDate']
-                monthly_data[meter_descriptor] = energy_consumption['meterData']['meterConsumption'][i]['usage']
+                monthly_data['End Date'] = energy_consumption['meterData'][consump_key][i][delivery_key]
+                monthly_data[meter_descriptor] = energy_consumption['meterData'][consump_key][i][amount_key]
 
                 energy_data.append(monthly_data)
 
