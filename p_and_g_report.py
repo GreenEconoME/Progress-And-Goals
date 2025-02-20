@@ -43,7 +43,7 @@ st.caption('Enter the Energy Star Portfolio Manager property ID.')
 
 # Add a select box to choose the year ending
 year_ending = st.selectbox('Select the year ending', 
-                            options = [2023, 2022, 2021, 2020, 2019,
+                            options = [2024, 2023, 2022, 2021, 2020, 2019,
                                         2018, 2017, 2016])
 st.caption('Select the final year of metrics you would like to see.<br>' + 
             'The Progress and Goals Report will include five years of data, ending with this year', 

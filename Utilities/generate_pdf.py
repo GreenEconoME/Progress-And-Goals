@@ -315,14 +315,14 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         pdf.ln(line_height)
 
     # Create a dictionary to hold the last year of the compliance period and their corresponding last digit of the LADBS Building ID
-    comp_periods = {'0' : 2020,
-                    '1' : 2020, 
-                    '2' : 2021, 
-                    '3' : 2021, 
-                    '4' : 2022, 
-                    '5' : 2022, 
-                    '6' : 2023, 
-                    '7' : 2023, 
+    comp_periods = {'0' : 2025,
+                    '1' : 2025, 
+                    '2' : 2026, 
+                    '3' : 2026, 
+                    '4' : 2027, 
+                    '5' : 2027, 
+                    '6' : 2028, 
+                    '7' : 2028, 
                     '8' : 2024, 
                     '9' : 2024}
     
