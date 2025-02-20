@@ -857,8 +857,8 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
         # Add in the note for historical benchmarking
         pdf.set_xy(10, pdf.y + 2)
-        pdf.write(txt = ''.join(['* (0-3) reflects the reissued due date from tolled deadlines.\n'
-                                '* Green Econome can provide historic benchmarking and Phase II reporting ', 
+        pdf.write(txt = ''.join(['*8-9 initial compliance due, where 0-7 is entering their second compliance cycle.\n'
+                                'Green Econome can provide historic benchmarking and Phase II reporting ', 
                                 'to bring any past-due EBEWE compliance up to date. ']))
         
         # Add the title for the most common EBEWE Exemptions
