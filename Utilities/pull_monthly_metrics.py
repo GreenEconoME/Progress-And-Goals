@@ -5,144 +5,70 @@ import numpy as np
 import xmltodict
 import streamlit as st
 
-
 # Define a function to pull the annual metrics for each month for energy and water
 def pull_monthly_metrics(energy_entries, water_entries, domain, auth, prop_id):
-    # Create a list of the end date entries
+    session = requests.Session()
+    session.auth = auth
+
+    # Combine dates from both dataframes
     if water_entries is not None:
         all_entries = set(list(water_entries['End Date']) + list(energy_entries['End Date']))
     else:
         all_entries = set(list(energy_entries['End Date']))
 
-    
     for entry_date in all_entries:
-        # Save the year and month of the month (date)
         year = entry_date.year
         month = entry_date.month
 
-        # If there is no water, only make calls to get the energy annual metrics per month
-        if water_entries is None:
-            # Make the call to get the historical metrics for the current month/year
-            energy_metrics = requests.get(domain + f"/property/{prop_id}/metrics?year={year}&month={month}&measurementSystem=EPA",
-                                        headers={'PM-Metrics': 'score, sourceTotalWN, medianSourceTotal, sourceIntensityWN, medianSourceIntensity'},
-                                        auth=auth)
+        def fetch_metrics(headers):
+            url = f"{domain}/property/{prop_id}/metrics?year={year}&month={month}&measurementSystem=EPA"
+            response = session.get(url, headers=headers)
+            return xmltodict.parse(response.content)
 
-            # Parse the historical metrics call
-            energy_metrics_dict = xmltodict.parse(energy_metrics.content)
+        def safe_assign(df, date, column, value):
+            df.loc[df['End Date'] == date, column] = value if isinstance(value, str) else np.nan
 
-            # Save the list containing the returned metrics
-            metrics = energy_metrics_dict['propertyMetrics']['metric']
+        # Determine which type of request is needed
+        if water_entries is None or month not in water_entries['End Date'].dt.month.values:
+            # Only energy
+            metrics_dict = fetch_metrics({'PM-Metrics': 'score, sourceTotalWN, medianSourceTotal, sourceIntensityWN, medianSourceIntensity'})
+            metrics = metrics_dict['propertyMetrics']['metric']
+            safe_assign(energy_entries, entry_date, 'Energy Star Score', metrics[0]['value'])
+            safe_assign(energy_entries, entry_date, 'Weather Normalized Source EU (kBtu)', metrics[1]['value'])
+            safe_assign(energy_entries, entry_date, 'National Median Source Energy Use (kBtu)', metrics[2]['value'])
+            safe_assign(energy_entries, entry_date, 'Weather Normalized Source EUI (kBtu/ft²)', metrics[3]['value'])
+            safe_assign(energy_entries, entry_date, 'National Median Source EUI (kBtu/ft²)', metrics[4]['value'])
 
-            # Create variables to hold the values for each of the metrics
-            energy_star_score = metrics[0]['value']
-            weather_normalized_source_eu = metrics[1]['value']
-            national_median_source_energy_use = metrics[2]['value']
-            weather_normalized_source_eui = metrics[3]['value']
-            national_median_source_eui = metrics[4]['value']
-            
-            # Add the metrics to the current row - if they exist they will be strings if they don't exist, insert a nan as the value
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'Energy Star Score'] = energy_star_score if isinstance(energy_star_score, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'Weather Normalized Source EU (kBtu)'] = weather_normalized_source_eu if isinstance(weather_normalized_source_eu, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'National Median Source Energy Use (kBtu)'] = national_median_source_energy_use if isinstance(national_median_source_energy_use, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'Weather Normalized Source EUI (kBtu/ft²)'] = weather_normalized_source_eui if isinstance(weather_normalized_source_eui, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'National Median Source EUI (kBtu/ft²)'] = national_median_source_eui if isinstance(national_median_source_eui, str) else np.nan
-            
-            # Format the datatype of the energy metric columns
-            energy_entries['Energy Star Score'] = pd.to_numeric(energy_entries['Energy Star Score'], errors='coerce')
-            energy_entries['Weather Normalized Source EU (kBtu)'] = pd.to_numeric(energy_entries['Weather Normalized Source EU (kBtu)'], errors='coerce')
-            energy_entries['National Median Source Energy Use (kBtu)'] = pd.to_numeric(energy_entries['National Median Source Energy Use (kBtu)'], errors='coerce')
-            energy_entries['Weather Normalized Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_entries['Weather Normalized Source EUI (kBtu/ft²)'], errors='coerce')
-            energy_entries['National Median Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_entries['National Median Source EUI (kBtu/ft²)'], errors='coerce')
+        elif month not in energy_entries['End Date'].dt.month.values:
+            # Only water
+            metrics_dict = fetch_metrics({'PM-Metrics': 'waterIntensityTotal'})
+            value = metrics_dict['propertyMetrics']['metric']['value']
+            safe_assign(water_entries, entry_date, 'Water Use Intensity', value)
 
-        # Will pull data based on if the current month is in only water, only energy or in both to reduce redundant api calls
-        # Check if the month is only in the water_entries df
-        elif month in water_entries['End Date'].values and month not in energy_entries['End Date'].values:
-            water_metrics = requests.get(domain + f"/property/{prop_id}/metrics?year={year}&month={month}&measurementSystem=EPA", 
-                                        headers = {'PM-Metrics': 'waterIntensityTotal'}, 
-                                        auth = auth)
-
-            # Parse the historical call
-            water_metrics_dict = xmltodict.parse(water_metrics.content)
-            # Save the water use intensity value
-            wui_metric = water_metrics_dict['propertyMetrics']['metric']['value']
-
-            # For the metric in the water_metrics_dict,
-            # Check if the metric exists (will be a string), and add it to the current row column
-            # If the metric does not exist, fill the value with a nan
-            water_entries.loc[water_entries['End Date'] == entry_date, 'Water Use Intensity'] = wui_metric if isinstance(wui_metric, str) else np.nan
-            
-            # Format the datatype of the water use intensity column
-            water_entries['Water Use Intensity'] = pd.to_numeric(water_entries['Water Use Intensity'])
-            
-        # Check if the month is only in the energy_entries df
-        elif month not in water_entries['End Date'].values and month in energy_entries['End Date'].values:
-            # Make the call to get the historical metrics for the current month/year
-            energy_metrics = requests.get(domain + f"/property/{prop_id}/metrics?year={year}&month={month}&measurementSystem=EPA",
-                                        headers={'PM-Metrics': 'score, sourceTotalWN, medianSourceTotal, sourceIntensityWN, medianSourceIntensity'},
-                                        auth=auth)
-
-            # Parse the historical metrics call
-            energy_metrics_dict = xmltodict.parse(energy_metrics.content)
-
-            # Save the list containing the returned metrics
-            metrics = energy_metrics_dict['propertyMetrics']['metric']
-
-            # Create variables to hold the values for each of the metrics
-            energy_star_score = metrics[0]['value']
-            weather_normalized_source_eu = metrics[1]['value']
-            national_median_source_energy_use = metrics[2]['value']
-            weather_normalized_source_eui = metrics[3]['value']
-            national_median_source_eui = metrics[4]['value']
-            
-            # Add the metrics to the current row - if they exist they will be strings if they don't exist, insert a nan as the value
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'Energy Star Score'] = energy_star_score if isinstance(energy_star_score, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'Weather Normalized Source EU (kBtu)'] = weather_normalized_source_eu if isinstance(weather_normalized_source_eu, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'National Median Source Energy Use (kBtu)'] = national_median_source_energy_use if isinstance(national_median_source_energy_use, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'Weather Normalized Source EUI (kBtu/ft²)'] = weather_normalized_source_eui if isinstance(weather_normalized_source_eui, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'National Median Source EUI (kBtu/ft²)'] = national_median_source_eui if isinstance(national_median_source_eui, str) else np.nan
-            
-            # Format the datatype of the energy metric columns
-            energy_entries['Energy Star Score'] = pd.to_numeric(energy_entries['Energy Star Score'])
-            energy_entries['Weather Normalized Source EU (kBtu)'] = pd.to_numeric(energy_entries['Weather Normalized Source EU (kBtu)'])
-            energy_entries['National Median Source Energy Use (kBtu)'] = pd.to_numeric(energy_entries['National Median Source Energy Use (kBtu)'])
-            energy_entries['Weather Normalized Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_entries['Weather Normalized Source EUI (kBtu/ft²)'])
-            energy_entries['National Median Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_entries['National Median Source EUI (kBtu/ft²)'])
-        
-        # Else, the month is in both
         else:
-            # Make the call to get the historical metrics for the current month/year
-            all_metrics = requests.get(domain + f"/property/{prop_id}/metrics?year={year}&month={month}&measurementSystem=EPA",
-                                        headers={'PM-Metrics': 'score, sourceTotalWN, medianSourceTotal, sourceIntensityWN, medianSourceIntensity, waterIntensityTotal'},
-                                        auth=auth)
+            # Both
+            metrics_dict = fetch_metrics({'PM-Metrics': 'score, sourceTotalWN, medianSourceTotal, sourceIntensityWN, medianSourceIntensity, waterIntensityTotal'})
+            metrics = metrics_dict['propertyMetrics']['metric']
+            safe_assign(energy_entries, entry_date, 'Energy Star Score', metrics[0]['value'])
+            safe_assign(energy_entries, entry_date, 'Weather Normalized Source EU (kBtu)', metrics[1]['value'])
+            safe_assign(energy_entries, entry_date, 'National Median Source Energy Use (kBtu)', metrics[2]['value'])
+            safe_assign(energy_entries, entry_date, 'Weather Normalized Source EUI (kBtu/ft²)', metrics[3]['value'])
+            safe_assign(energy_entries, entry_date, 'National Median Source EUI (kBtu/ft²)', metrics[4]['value'])
+            safe_assign(water_entries, entry_date, 'Water Use Intensity', metrics[5]['value'])
 
-            # Parse the historical metrics call
-            all_metrics_dict = xmltodict.parse(all_metrics.content)
+    # Format energy columns
+    energy_cols = [
+        'Energy Star Score',
+        'Weather Normalized Source EU (kBtu)',
+        'National Median Source Energy Use (kBtu)',
+        'Weather Normalized Source EUI (kBtu/ft²)',
+        'National Median Source EUI (kBtu/ft²)'
+    ]
+    for col in energy_cols:
+        energy_entries[col] = pd.to_numeric(energy_entries[col], errors='coerce')
 
-            # Save the list containing the returned metrics
-            metrics = all_metrics_dict['propertyMetrics']['metric']
-
-            # Create variables to hold the values for each of the metrics
-            energy_star_score = metrics[0]['value']
-            weather_normalized_source_eu = metrics[1]['value']
-            national_median_source_energy_use = metrics[2]['value']
-            weather_normalized_source_eui = metrics[3]['value']
-            national_median_source_eui = metrics[4]['value']
-            wui_metric = metrics[5]['value']
-            
-            # Add the metrics to the current date - if they exist they will be strings if they don't exist, insert a nan as the value
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'Energy Star Score'] = energy_star_score if isinstance(energy_star_score, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'Weather Normalized Source EU (kBtu)'] = weather_normalized_source_eu if isinstance(weather_normalized_source_eu, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'National Median Source Energy Use (kBtu)'] = national_median_source_energy_use if isinstance(national_median_source_energy_use, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'Weather Normalized Source EUI (kBtu/ft²)'] = weather_normalized_source_eui if isinstance(weather_normalized_source_eui, str) else np.nan
-            energy_entries.loc[energy_entries['End Date'] == entry_date, 'National Median Source EUI (kBtu/ft²)'] = national_median_source_eui if isinstance(national_median_source_eui, str) else np.nan
-            water_entries.loc[water_entries['End Date'] == entry_date, 'Water Use Intensity'] = wui_metric if isinstance(wui_metric, str) else np.nan
-            
-            # Format the datatype of the annual metric columns
-            energy_entries['Energy Star Score'] = pd.to_numeric(energy_entries['Energy Star Score'], errors='coerce')
-            energy_entries['Weather Normalized Source EU (kBtu)'] = pd.to_numeric(energy_entries['Weather Normalized Source EU (kBtu)'], errors='coerce')
-            energy_entries['National Median Source Energy Use (kBtu)'] = pd.to_numeric(energy_entries['National Median Source Energy Use (kBtu)'], errors='coerce')
-            energy_entries['Weather Normalized Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_entries['Weather Normalized Source EUI (kBtu/ft²)'], errors='coerce')
-            energy_entries['National Median Source EUI (kBtu/ft²)'] = pd.to_numeric(energy_entries['National Median Source EUI (kBtu/ft²)'], errors='coerce')
-            water_entries['Water Use Intensity'] = pd.to_numeric(water_entries['Water Use Intensity'], errors='coerce')
+    if water_entries is not None:
+        water_entries['Water Use Intensity'] = pd.to_numeric(water_entries['Water Use Intensity'], errors='coerce')
 
     return energy_entries, water_entries
+
