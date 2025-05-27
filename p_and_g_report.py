@@ -18,18 +18,26 @@ st.markdown("<h2 style = 'text-align: center; color: black;'>Progress and Goals 
 # Set the domain for the API calls
 domain = 'https://portfoliomanager.energystar.gov/ws'
 
-# Load credentials for the API calls into the auth variable
-credential_upload = st.file_uploader('Upload ESPM API Credentials')
-if credential_upload:
-    creds = []
-    for line in credential_upload:
-        creds.append(line.decode().strip())
-    auth = (creds[0], creds[1])
+# Initialize session state for credentials if not already set
+if "auth" not in st.session_state:
+    # Load credentials for the API calls into the auth variable
+    credential_upload = st.file_uploader('Upload ESPM API Credentials')
 
-st.caption('Upload the API credentials within a .txt file with the Username and Password on seperate lines. <br>' + 
+    st.caption('Upload the API credentials within a .txt file with the Username and Password on seperate lines. <br>' + 
             'The .txt file should be of the following format:<br>' + 
             'Username<br>' + 
             'Password', unsafe_allow_html = True)
+    
+    if credential_upload:
+        creds = [line.decode().strip() for line in credential_upload]
+        st.session_state.auth = (creds[0], creds[1])
+        st.rerun()
+
+else:
+    st.success('API Credentials have been uploaded.')
+    auth = st.session_state.auth
+    
+
 
 # Create a dictionary to hold the numeric value of the month selection
 month_dict = {'Jan': 1, 'Feb' : 2, 'Mar' : 3, 'Apr' : 4, 'May' : 5, 
@@ -77,7 +85,7 @@ if st.button('Generate Progress and Goals Report'):
     with st.spinner('Generating Progress and Goals Report'):
 
         # Check if the building and date selections are entered
-        if (credential_upload and 
+        if (auth and 
             prop_id and 
             year_ending and 
             month_select is not None) and (
