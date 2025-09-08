@@ -677,7 +677,7 @@ def generate_pdf(about_data, ann_metrics, prop_id,
         pdf.set_font('Roboto', '', 20)
         pdf.cell(w = 0, 
                  h = None,
-                 txt = 'This Property does not have a water meter.', 
+                 txt = 'This building is not required to report its water usage.', 
                  border = 0, 
                  align = 'C')
 
