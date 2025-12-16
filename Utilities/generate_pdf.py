@@ -47,15 +47,28 @@ def generate_pdf(about_data, ann_metrics, prop_id,
                           'fonts/Roboto-Italic.ttf', 
                           uni = True)
 
+        ## Old GE Footer
+        # def footer(self): 
+        #     self.set_y(-15)
+        #     self.set_font("Roboto", "I", 7)
+        #     self.cell(0, 
+        #              10, 
+        #              ' | '.join(['GREENECONOME.COM', 
+        #                         '424-422-9696', 
+        #                         'info@greeneconome.com', 
+        #                         'CA Contractors License B and C-10 #1001368']),
+        #              align = 'C')
+            
         def footer(self):
             self.set_y(-15)
             self.set_font("Roboto", "I", 7)
             self.cell(0, 
                      10, 
-                     ' | '.join(['GREENECONOME.COM', 
-                                '424-422-9696', 
-                                'info@greeneconome.com', 
-                                'CA Contractors License B and C-10 #1001368']),
+                     ' | '.join(['T: (714) 363-4700', 
+                                'F: (714) 363-4747', 
+                                'www.vca-green.com', 
+                                '1845 W. Orangewood Ave., Ste. 220', 
+                                'Orange, CA 92868']),
                      align = 'C')
 
     # Create the pdf object and set the author and title
