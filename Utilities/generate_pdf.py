@@ -80,11 +80,14 @@ def generate_pdf(about_data, ann_metrics, prop_id,
 
     # Add the logo to the top left of the pdf
     # Add width and height variables for the logo
-    logo_w = 80
-    logo_h = round(logo_w / 4.3626)
+    # logo_w = 80 # for ge logo
+    # logo_h = round(logo_w / 4.3626) # dimensions for ge logo
+    logo_w = 60
+    logo_h = round(logo_w / 2.24369747)
     pdf.image(x = 11,
               y = 11, 
-              name = 'Resources/NEW Green EconoME Logo.png', 
+            #   name = 'Resources/NEW Green EconoME Logo.png', 
+              name = 'Resources/vca-logo.png', 
               w = logo_w, 
               h = logo_h)
 

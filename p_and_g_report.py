@@ -12,7 +12,7 @@ from Utilities.plot_metrics import (graph_eu, graph_hcf, graph_es_score,
                             graph_g_meters_overlay)
 
 # Set a title for the page
-st.markdown("<h1 style = 'text-align: center; color: green;'>Green EconoME</h1>", unsafe_allow_html = True)
+st.markdown("<h1 style = 'text-align: center; color: green;'>VCA Green</h1>", unsafe_allow_html = True)
 st.markdown("<h2 style = 'text-align: center; color: black;'>Progress and Goals Report</h2>", unsafe_allow_html = True)
 
 # Set the domain for the API calls
@@ -51,8 +51,9 @@ st.caption('Enter the Energy Star Portfolio Manager property ID.')
 
 # Add a select box to choose the year ending
 year_ending = st.selectbox('Select the year ending', 
-                            options = [2024, 2023, 2022, 2021, 2020, 2019,
-                                        2018, 2017, 2016])
+                            options = [2025, 2024, 2023, 2022, 
+                                       2021, 2020, 2019,
+                                       2018, 2017, 2016])
 st.caption('Select the final year of metrics you would like to see.<br>' + 
             'The Progress and Goals Report will include five years of data, ending with this year', 
             unsafe_allow_html = True)
